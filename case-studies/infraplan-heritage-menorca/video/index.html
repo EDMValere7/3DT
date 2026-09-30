@@ -236,6 +236,8 @@ function render(t) {
 }
 window.render = render;
 window.DURATION = DUR;
+// ?clean=1 renders the visuals only (used for the social graphics)
+if (new URLSearchParams(location.search).get("clean")) ["titles", "caption", "progress", "cards", "outro", "flash"].forEach(id => $(id).style.visibility = "hidden");
 window.ready = (async () => {
   await document.fonts.ready;
   await Promise.all([...document.images].map(i => i.decode().catch(() => {})));

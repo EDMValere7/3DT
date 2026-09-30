@@ -1,0 +1,117 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>3DT × Infraplan — social graphics</title>
+<style>
+  @font-face { font-family: "Inter Tight"; src: url(fonts/InterTight.woff2) format("woff2"); font-weight: 100 900; }
+  @font-face { font-family: "JetBrains Mono"; src: url(fonts/JetBrainsMono.woff2) format("woff2"); font-weight: 100 800; }
+  :root { --red: #D92C1C; --ink: #07090c; --white: #f5f7fa; --dim: rgba(245,247,250,.72); }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: #222; }
+  .frame { position: relative; width: 1080px; overflow: hidden; background: var(--ink); color: var(--white); font-family: "Inter Tight", sans-serif; }
+  .p45 { height: 1350px; } .p916 { height: 1920px; }
+  .bg { position: absolute; left: 0; width: 1080px; height: 1920px; object-fit: cover; }
+  .shade { position: absolute; inset: 0; }
+  .grain { position: absolute; inset: 0; opacity: .05; mix-blend-mode: overlay; background-image: url(assets/grain.png); }
+
+  .top { position: absolute; top: 64px; left: 72px; right: 72px; display: flex; align-items: center; justify-content: space-between; }
+  .logo-s { width: 84px; height: 84px; display: block; }
+  .count { font-family: "JetBrains Mono", monospace; font-size: 26px; letter-spacing: .16em; color: var(--dim); }
+  .kicker { font-family: "JetBrains Mono", monospace; font-size: 28px; letter-spacing: .2em; color: var(--dim); display: flex; align-items: center; gap: 16px; margin-bottom: 30px; }
+  .kicker::before { content: ""; width: 14px; height: 14px; background: var(--red); border-radius: 50%; flex: none; }
+  .copy { position: absolute; left: 72px; right: 72px; }
+  h1 { font-weight: 900; font-size: 124px; line-height: .92; letter-spacing: -.045em; }
+  h1.xl { font-size: 150px; }
+  h1 .r { color: var(--red); }
+  h1 .hl { background: var(--red); padding: 0 .12em; border-radius: .08em; }
+  .body { font-weight: 600; font-size: 44px; line-height: 1.25; letter-spacing: -.01em; color: rgba(245,247,250,.88); margin-top: 34px; max-width: 900px; }
+  .foot { position: absolute; left: 72px; right: 72px; bottom: 64px; display: flex; justify-content: space-between; align-items: center; font-family: "JetBrains Mono", monospace; font-size: 24px; letter-spacing: .16em; color: var(--dim); }
+  .swipe { display: flex; align-items: center; gap: 14px; color: var(--white); }
+  .swipe i { width: 64px; height: 64px; border-radius: 50%; background: var(--red); display: grid; place-items: center; font-style: normal; font-family: "Inter Tight"; font-weight: 800; font-size: 34px; letter-spacing: 0; }
+
+  .grid { position: absolute; left: 72px; right: 72px; top: 440px; display: grid; grid-template-columns: 1fr 1fr; gap: 22px; }
+  .grid .ph { height: 290px; border-radius: 30px; overflow: hidden; position: relative; border: 2px solid rgba(255,255,255,.12); }
+  .grid img { width: 100%; height: 100%; object-fit: cover; }
+  .grid .ph span { position: absolute; left: 16px; bottom: 16px; font-family: "JetBrains Mono", monospace; font-weight: 700; font-size: 22px; letter-spacing: .14em; padding: 8px 14px; border-radius: 10px; background: rgba(7,9,12,.75); }
+
+  .stats { position: absolute; left: 72px; right: 72px; top: 330px; display: flex; flex-direction: column; gap: 44px; }
+  .stat { display: flex; align-items: baseline; gap: 34px; border-top: 2px solid rgba(255,255,255,.14); padding-top: 34px; }
+  .stat .n { font-weight: 900; font-size: 150px; letter-spacing: -.055em; line-height: .85; min-width: 420px; white-space: nowrap; }
+  .stat .n small { font-size: 64px; letter-spacing: -.03em; margin-left: 8px; }
+  .stat .l { font-weight: 600; font-size: 40px; line-height: 1.2; color: rgba(245,247,250,.85); }
+
+  .center { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; gap: 56px; }
+  .logo-l { width: 380px; height: 380px; box-shadow: 0 40px 120px rgba(217,44,28,.4); }
+  .pill { font-weight: 800; font-size: 54px; padding: 24px 52px; border-radius: 999px; background: var(--white); color: var(--ink); }
+  .pill b { color: var(--red); }
+  .cta-h { font-weight: 900; font-size: 84px; letter-spacing: -.04em; line-height: 1; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script>
+const q = new URLSearchParams(location.search), LANG = q.get("lang") || "it", G = q.get("g") || "c1";
+const T = {
+  it: {
+    kicker: "CASE STUDY · HERITAGE RECONSTRUCTION", credit: "SCANFLY EVO × INFRAPLAN", swipe: "SCORRI",
+    c1: "Tre città.<br>Tre isole.<br><span class=r>Un solo sistema.</span>",
+    c2k: "01 · LA SFIDA", c2: "Dove l'auto<br><span class=r>non arriva.</span>",
+    c2b: "Vicoli stretti, zone pedonali e tre isole nel porto di Maó: il mobile mapping su auto non arriva ovunque.",
+    c3k: "02 · LA SOLUZIONE", c3: "Scanfly <span class=hl>EVO</span>",
+    c3b: "Dal tetto dell'auto allo zaino, senza attrezzi. Poi in bici, a piedi e in barca.",
+    ph: ["AUTO", "ZAINO", "BICI", "A PIEDI"],
+    c4k: "03 · I RISULTATI",
+    st: [["&lt;3", "giorni", "sul campo, spostamenti in barca inclusi"], ["&lt;10", "cm", "di precisione sui punti di controllo"], ["3+3", "", "città e isole rilevate"]],
+    c5: "Leggi il case study completo", cta: "<b>3dt.cloud</b>",
+    rc: "Dove l'auto<br><span class=r>non arriva?</span>", rcs: "MENORCA · SCANFLY EVO",
+  },
+  en: {
+    kicker: "CASE STUDY · HERITAGE RECONSTRUCTION", credit: "SCANFLY EVO × INFRAPLAN", swipe: "SWIPE",
+    c1: "Three towns.<br>Three islands.<br><span class=r>One system.</span>",
+    c2k: "01 · THE CHALLENGE", c2: "Where cars<br><span class=r>can't go.</span>",
+    c2b: "Narrow alleys, pedestrian zones and three islands in Maó harbor: car-mounted mobile mapping can't reach them all.",
+    c3k: "02 · THE SOLUTION", c3: "Scanfly <span class=hl>EVO</span>",
+    c3b: "From car roof to backpack, no tools needed. Then on by bike, on foot and by boat.",
+    ph: ["CAR", "BACKPACK", "BIKE", "ON FOOT"],
+    c4k: "03 · THE RESULTS",
+    st: [["&lt;3", "days", "in the field, boat transfers included"], ["&lt;10", "cm", "accuracy against ground control points"], ["3+3", "", "towns and islands captured"]],
+    c5: "Read the full case study", cta: "<b>3dt.cloud</b>",
+    rc: "No road?<br><span class=r>No problem.</span>", rcs: "MENORCA · SCANFLY EVO",
+  },
+}[LANG];
+
+const header = n => `<div class="top"><img class="logo-s" src="assets/logo.jpg">${n ? `<div class="count">${n} / 5</div>` : ""}</div>`;
+const foot = (swipe = true) => `<div class="foot"><span>${T.credit}</span>${swipe ? `<span class="swipe">${T.swipe}<i>→</i></span>` : ""}</div>`;
+const bg = (img, y, shade) => `<img class="bg" src="assets/${img}.jpg" style="top:${y}px"><div class="shade" style="background:${shade}"></div>`;
+const fadeTop = "linear-gradient(180deg, rgba(7,9,12,.96) 0%, rgba(7,9,12,.75) 34%, rgba(7,9,12,0) 55%, rgba(7,9,12,0) 80%, rgba(7,9,12,.9) 100%)";
+
+const L = {
+  c1: () => `<div class="frame p45">${bg("bg_hosp_color", -60, "linear-gradient(180deg, rgba(7,9,12,.9) 0%, rgba(7,9,12,.3) 48%, rgba(7,9,12,0) 60%, rgba(7,9,12,.85) 100%)")}
+    ${header(1)}<div class="copy" style="top:220px"><div class="kicker">${T.kicker}</div><h1>${T.c1}</h1></div>${foot()}<div class="grain"></div></div>`,
+  c2: () => `<div class="frame p45">${bg("bg_map", 40, fadeTop)}
+    ${header(2)}<div class="copy" style="top:220px"><div class="kicker">${T.c2k}</div><h1>${T.c2}</h1><div class="body">${T.c2b}</div></div>${foot()}<div class="grain"></div></div>`,
+  c3: () => `<div class="frame p45">${bg("bg_coverage", -120, "rgba(7,9,12,.72)")}
+    ${header(3)}<div class="copy" style="top:220px"><div class="kicker">${T.c3k}</div><h1>${T.c3}</h1></div>
+    <div class="grid">${["car", "backpack", "bike", "walk"].map((p, i) => `<div class="ph"><img src="assets/${p}.jpg"><span>${T.ph[i]}</span></div>`).join("")}</div>
+    <div class="copy" style="top:1082px"><div class="body" style="margin:0; font-size:42px">${T.c3b}</div></div>
+    ${foot()}<div class="grain"></div></div>`,
+  c4: () => `<div class="frame p45">${bg("bg_hosp_raw", 380, "linear-gradient(180deg, rgba(7,9,12,.98) 0%, rgba(7,9,12,.9) 55%, rgba(7,9,12,.35) 80%, rgba(7,9,12,.8) 100%)")}
+    ${header(4)}<div class="copy" style="top:220px"><div class="kicker">${T.c4k}</div></div>
+    <div class="stats">${T.st.map(([n, u, l]) => `<div class="stat"><div class="n">${n}${u ? `<small>${u}</small>` : ""}</div><div class="l">${l}</div></div>`).join("")}</div>
+    ${foot()}<div class="grain"></div></div>`,
+  c5: () => `<div class="frame p45">${bg("bg_hosp_color", -120, "rgba(7,9,12,.82)")}
+    ${header(5).replace('<img class="logo-s" src="assets/logo.jpg">', "<span></span>")}
+    <div class="center"><img class="logo-l" src="assets/logo.jpg"><div class="cta-h">${T.c5}</div><div class="pill">${T.cta}</div></div>
+    ${foot(false)}<div class="grain"></div></div>`,
+  // reel cover (9:16); all key content sits inside the central 4:5 area used by the profile grid
+  cover: () => `<div class="frame p916">${bg("bg_town", 330, "linear-gradient(180deg, rgba(7,9,12,.95) 0%, rgba(7,9,12,.9) 36%, rgba(7,9,12,.25) 56%, rgba(7,9,12,.2) 75%, rgba(7,9,12,.95) 100%)")}
+    <div class="copy" style="top:330px"><img class="logo-s" src="assets/logo.jpg" style="width:110px;height:110px;margin-bottom:56px">
+      <div class="kicker">${T.kicker}</div><h1 class="xl">${T.rc}</h1></div>
+    <div class="grain"></div></div>`,
+};
+document.getElementById("root").innerHTML = L[G]();
+window.ready = (async () => { await document.fonts.ready; await Promise.all([...document.images].map(i => i.decode().catch(() => {}))); return true; })();
+</script>
+</body>
+</html>

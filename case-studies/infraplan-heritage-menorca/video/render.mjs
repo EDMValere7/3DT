@@ -13,7 +13,7 @@ const FPS = 30;
 const browser = await chromium.launch();
 const page = await browser.newPage({ viewport: { width: 1080, height: 1920 }, deviceScaleFactor: 1 });
 page.on("pageerror", e => { console.error("page error:", e.message); process.exit(1); });
-await page.goto("file://" + path.join(here, "index.html") + "?lang=" + lang);
+await page.goto("file://" + path.join(here, "index.html") + "?lang=" + lang + (process.env.CLEAN ? "&clean=1" : ""));
 await page.evaluate(() => window.ready);
 const overlaps = await page.evaluate(() => window.overlaps);
 if (overlaps.length) { console.error("caption/title overlap:\n" + overlaps.join("\n")); process.exit(1); }
