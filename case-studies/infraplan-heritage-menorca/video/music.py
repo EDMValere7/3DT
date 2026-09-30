@@ -1,4 +1,4 @@
-"""Procedural 30s soundtrack, 120 BPM, A minor with a Mediterranean E-major turn (Am F C E). Cuts on bars at 4/10/18/26s (same as index.html).
+"""Procedural 30s soundtrack, 120 BPM, A minor with a Mediterranean E-major turn (Am F C E). 24 bars; sections start on bars 4/10/16/21 (7.5/18.75/30/39.375 s, same as index.html).
 usage: python3 music.py out/music.wav
 """
 import sys
@@ -6,7 +6,7 @@ import numpy as np
 from scipy.signal import butter, sosfilt, fftconvolve
 from scipy.io import wavfile
 
-SR, DUR, BPM = 44100, 30.0, 120
+SR, DUR, BPM = 44100, 45.0, 128
 BEAT = 60 / BPM
 BAR = 4 * BEAT
 N = int(SR * DUR)
@@ -152,7 +152,7 @@ kicks = []
 for b in range(bars):
     t0 = b * BAR
     notes, root = CH[b % 4]
-    sec = "intro" if t0 < 4 else "A" if t0 < 10 else "B" if t0 < 18 else "C" if t0 < 26 else "out"
+    sec = "intro" if b < 4 else "A" if b < 10 else "B" if b < 16 else "C" if b < 21 else "out"
     if sec != "out":
         place("music", pad(notes, BAR + 0.3), t0, 1.0 if sec != "intro" else 0.7)
     # drums
@@ -179,7 +179,7 @@ for b in range(bars):
     elif sec == "intro":
         place("bass", bass(root, BAR * 0.95) * 0.6, t0)
     # arp
-    if sec in ("B", "C") or (sec == "intro" and t0 >= 2):
+    if sec in ("B", "C") or (sec == "intro" and b >= 2):
         pat = ARP[b % 4]
         for k in range(16):
             m = pat[k % 4] + (12 if sec == "C" and k % 8 >= 6 else 0)
@@ -189,19 +189,18 @@ for b in range(bars):
             place("drums", rim(), t0 + k * BEAT / 4, 0.5, pan=0.25)
 
 # riser into first drop, whooshes into every cut, impacts on cuts
-place("fx", riser(1.8), 2.2, 0.8)
-place("fx", riser(1.8), 8.2, 0.9)
-place("fx", riser(1.9), 16.1, 0.9)
-place("fx", riser(1.8), 24.2, 0.8)
-for c in (4, 10, 18, 26):
+CUTS = [4 * BAR, 10 * BAR, 16 * BAR, 21 * BAR]
+for c in CUTS:
+    place("fx", riser(1.8), c - 1.8, 0.85)
     place("fx", whoosh(0.8), c - 0.8, 0.35)
-for c, g in ((0, 0.9), (10, 1.0), (18, 0.8), (26, 1.1)):
+for c, g in zip([0] + CUTS, (0.9, 0.8, 1.0, 0.9, 1.1)):
     place("fx", impact(), c, g)
+OUT = CUTS[-1]
 # outro: logo sting + long chord
-place("music", filt(pad([64, 69, 71, 72, 76], 4.0), "highpass", 160) * 1.5, 26.0)
+place("music", filt(pad([64, 69, 71, 72, 76], DUR - OUT), "highpass", 160) * 1.5, OUT)
 for i, m in enumerate((69, 76, 81)):
-    place("music", ks(m, 2.5) * 1.6 + pluck(m + 12, 2.5) * 0.5, 26.35 + i * 0.12, 0.8, pan=(-0.4, 0, 0.4)[i])
-place("drums", kick(), 26.0, 1.0)
+    place("music", ks(m, 3.5) * 1.6 + pluck(m + 12, 3.5) * 0.5, OUT + 0.35 + i * 0.12, 0.8, pan=(-0.4, 0, 0.4)[i])
+place("drums", kick(), OUT, 1.0)
 
 # ---------- mix ----------
 tax = np.arange(N) / SR

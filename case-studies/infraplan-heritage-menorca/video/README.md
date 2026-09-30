@@ -1,22 +1,24 @@
-# 3DT × Infraplan: Heritage Reconstruction, reel da 30 secondi
+# 3DT × Infraplan: Heritage Reconstruction, reel da 45 secondi (IT + EN)
 
-Video verticale 9:16 (1080×1920, 30 fps) con sottotitoli incisi e musica generata, tratto dal case study *Heritage Reconstruction* (Scanfly EVO, Menorca).
+Video verticale 9:16 (1080×1920, 30 fps) con sottotitoli incisi e musica generata, tratto dal case study *Heritage Reconstruction* (Scanfly EVO, Menorca). È disponibile in due versioni, italiana e inglese, con testi scritti in ciascuna lingua (non tradotti riga per riga).
 
-- `out/3DT_Infraplan_Menorca_reel_30s.mp4`: il video finale (H.264 + AAC, -14 LUFS)
-- `out/cover.jpg`: fotogramma da usare come cover
-- `assets/`: logo, foto reali del rilievo e render delle nuvole di punti (`clouds.js`) estratti dal PDF del case study
-- `index.html`: le scene. Le immagini delle nuvole di punti diventano particelle con profondità (parallasse); la mappa del porto di Maó è stilizzata
-- `music.py`: colonna sonora a 120 BPM in La minore (Am–F–C–E), con i tagli sulle battute a 4, 10, 18 e 26 s
-- `render.mjs`: esporta i fotogrammi con Chromium tramite Playwright e li codifica con ffmpeg
+- `out/3DT_Infraplan_Menorca_reel_45s_IT.mp4` e `out/3DT_Infraplan_Menorca_reel_45s_EN.mp4`: i video finali (H.264 + AAC, -14 LUFS)
+- `out/cover_IT.jpg` e `out/cover_EN.jpg`: fotogrammi da usare come cover
+- `copy.js`: **tutti i testi** delle due lingue (titoli e sottotitoli con i loro tempi)
+- `index.html`: le scene; la lingua si sceglie con `?lang=it` oppure `?lang=en`
+- `engine.js`: il renderer delle nuvole di punti e la geometria (render reali trasformati in particelle, mappa stilizzata del porto di Maó)
+- `music.py`: colonna sonora a 128 BPM (24 battute, 45 s) in La minore (Am–F–C–E); le sezioni iniziano a 7,5 / 18,75 / 30 / 39,4 s
+- `render.mjs`, `build.sh`: esportazione dei fotogrammi con Chromium e codifica con ffmpeg
 
-Tutti i dati vengono dal case study: 3 città (Maó, Ciutadella, Es Castell) e 3 isole; acquisizione in meno di 3 giorni, spostamenti in barca inclusi; precisione inferiore a 10 cm rispetto ai punti di controllo; SLAM in SmartProcessing Lidar; GNSS con RINEX da rete CORS.
+## Regola di leggibilità
+Sullo schermo c'è **una sola cosa da leggere per volta**: o un titolo o un sottotitolo, mai entrambi. `render.mjs` si ferma con un errore se in `copy.js` un sottotitolo si sovrappone a un titolo.
+
+## Dati (tutti dal case study)
+3 città (Maó, Ciutadella, Es Castell) e 3 isole; acquisizione in meno di 3 giorni, spostamenti in barca inclusi; precisione inferiore a 10 cm rispetto ai punti di controllo; operatore in bici, a piedi e in barca; nessun attrezzo per passare dall'auto allo zaino.
 
 ## Rigenerare
 ```bash
 npm install && pip install numpy scipy imageio-ffmpeg
-python3 music.py out/music.wav
-node render.mjs out/video_noaudio.mp4                          # oppure --stills 1,5,12 per le anteprime
-ffmpeg -i out/video_noaudio.mp4 -i out/music.wav -map 0:v -map 1:a -c:v libx264 -preset slow -crf 21 \
-  -maxrate 14M -bufsize 28M -pix_fmt yuv420p -af loudnorm=I=-14:TP=-1.5:LRA=7 -c:a aac -b:a 192k \
-  -shortest -movflags +faststart out/3DT_Infraplan_Menorca_reel_30s.mp4
+./build.sh                       # entrambe le lingue
+node render.mjs en --stills 2,10,20   # anteprime
 ```

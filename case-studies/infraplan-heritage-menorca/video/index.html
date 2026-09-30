@@ -1,68 +1,46 @@
 <!doctype html>
-<html lang="it">
+<html>
 <head>
 <meta charset="utf-8">
-<title>3DT × Infraplan — Heritage Reconstruction — Reel 30s</title>
+<title>3DT × Infraplan — Heritage Reconstruction — Reel 45s</title>
 <style>
   @font-face { font-family: "Inter Tight"; src: url(fonts/InterTight.woff2) format("woff2"); font-weight: 100 900; }
-  @font-face { font-family: "JetBrains Mono"; src: url(fonts/JetBrainsMono.woff2) format("woff2"); font-weight: 100 800; }
   :root { --red: #D92C1C; --ink: #07090c; --white: #f5f7fa; }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   html, body { width: 1080px; height: 1920px; background: var(--ink); overflow: hidden; }
   #stage { position: relative; width: 1080px; height: 1920px; overflow: hidden; background: var(--ink); font-family: "Inter Tight", sans-serif; color: var(--white); }
   canvas { position: absolute; left: 0; top: 0; }
   .layer { position: absolute; inset: 0; pointer-events: none; }
-  #scrim { background: linear-gradient(180deg, rgba(7,9,12,.92) 0%, rgba(7,9,12,.5) 20%, rgba(7,9,12,0) 34%, rgba(7,9,12,0) 62%, rgba(7,9,12,.6) 74%, rgba(7,9,12,.95) 100%); }
+  #scrim { background: linear-gradient(180deg, rgba(7,9,12,.9) 0%, rgba(7,9,12,.45) 20%, rgba(7,9,12,0) 34%, rgba(7,9,12,0) 62%, rgba(7,9,12,.55) 74%, rgba(7,9,12,.92) 100%); }
   #vignette { background: radial-gradient(110% 80% at 50% 50%, rgba(0,0,0,0) 55%, rgba(0,0,0,.55) 100%); }
-  .mono { font-family: "JetBrains Mono", monospace; }
 
   #progress { position: absolute; top: 64px; left: 60px; right: 60px; display: flex; gap: 10px; }
   #progress div { flex: 1; height: 5px; border-radius: 3px; background: rgba(255,255,255,.18); overflow: hidden; }
   #progress i { display: block; height: 100%; width: 0; background: var(--white); }
-  #hudL { position: absolute; top: 104px; left: 60px; font-size: 24px; letter-spacing: .12em; color: rgba(245,247,250,.75); line-height: 1.6; }
-  #hudL b { color: var(--red); }
-  #chip { position: absolute; top: 104px; right: 60px; font-size: 20px; letter-spacing: .14em; color: var(--white); border-radius: 999px; padding: 7px 16px; background: var(--red); }
-  #ticker { position: absolute; top: 1296px; left: 60px; right: 60px; display: flex; justify-content: space-between; font-size: 22px; letter-spacing: .14em; color: rgba(245,247,250,.8); padding: 14px 24px; border-radius: 16px; background: rgba(7,9,12,.55); border: 1px solid rgba(255,255,255,.1); }
-  #ticker b { color: var(--white); font-weight: 700; }
 
-  .scene { position: absolute; left: 60px; right: 60px; top: 240px; }
-  .kicker { font-family: "JetBrains Mono", monospace; font-size: 28px; letter-spacing: .22em; color: rgba(245,247,250,.8); display: flex; align-items: center; gap: 16px; margin-bottom: 24px; overflow: hidden; }
-  .kicker::before { content: ""; width: 14px; height: 14px; background: var(--red); border-radius: 50%; flex: none; }
+  .title { position: absolute; left: 60px; right: 60px; top: 230px; display: none; }
   .line { overflow: hidden; padding-bottom: .06em; }
-  .line > span { display: inline-block; font-weight: 900; font-size: 150px; line-height: .92; letter-spacing: -.045em; }
-  .sm > span { font-size: 120px; }
-  .red { color: var(--red); }
+  .line > span { display: inline-block; font-weight: 900; font-size: 128px; line-height: .92; letter-spacing: -.045em; }
+  .title.big .line > span { font-size: 168px; }
+  .r { color: var(--red); }
   .hl { background: var(--red); color: var(--white); padding: 0 .12em; border-radius: .08em; }
+  .stat .line > span { font-size: 260px; line-height: .88; letter-spacing: -.055em; }
+  .stat .line > span small { font-size: 110px; letter-spacing: -.03em; margin-left: 14px; }
+  .stat .line.lab > span { font-size: 60px; font-weight: 800; letter-spacing: -.01em; color: rgba(245,247,250,.8); line-height: 1.1; }
 
-  /* map labels */
-  .tag { position: absolute; left: 0; top: 0; font-family: "JetBrains Mono", monospace; font-weight: 700; font-size: 22px; letter-spacing: .12em; padding: 8px 14px; border-radius: 10px; background: var(--red); color: #fff; white-space: nowrap; box-shadow: 0 8px 30px rgba(0,0,0,.5); }
-  .tag.ghost { background: rgba(7,9,12,.7); border: 1.5px solid rgba(255,255,255,.35); }
-
-  /* platform cards */
   #cards { position: absolute; left: 0; right: 0; top: 600px; height: 700px; }
-  .pcard { position: absolute; left: 50%; top: 0; width: 470px; height: 620px; margin-left: -235px; border-radius: 36px; overflow: hidden; background: #111; box-shadow: 0 30px 80px rgba(0,0,0,.6); border: 2px solid rgba(255,255,255,.14); }
+  .pcard { position: absolute; left: 50%; top: 0; width: 470px; height: 620px; margin-left: -235px; border-radius: 36px; overflow: hidden; background: #111; box-shadow: 0 30px 80px rgba(0,0,0,.6); border: 2px solid rgba(255,255,255,.14); display: none; }
   .pcard img { width: 100%; height: 100%; object-fit: cover; }
-  .pcard .lab { position: absolute; left: 20px; bottom: 20px; font-family: "JetBrains Mono", monospace; font-weight: 700; font-size: 24px; letter-spacing: .14em; padding: 10px 16px; border-radius: 12px; background: rgba(7,9,12,.72); backdrop-filter: blur(10px); }
-  .pcard .lab b { color: var(--red); margin-right: 10px; }
   .pcard.wide { width: 860px; height: 400px; margin-left: -430px; top: 110px; }
 
-  #stats { position: absolute; top: 1150px; left: 60px; right: 60px; display: flex; gap: 22px; }
-  .card { flex: 1; border-radius: 30px; padding: 26px 24px 24px; background: rgba(12,16,22,.66); border: 1.5px solid rgba(255,255,255,.14); backdrop-filter: blur(18px); }
-  .card .n { font-weight: 900; font-size: 76px; letter-spacing: -.04em; line-height: 1; white-space: nowrap; }
-  .card .n small { font-size: 38px; font-weight: 800; letter-spacing: -.02em; margin-left: 4px; color: rgba(245,247,250,.8); }
-  .card .l { font-family: "JetBrains Mono", monospace; font-size: 21px; letter-spacing: .14em; color: rgba(245,247,250,.65); margin-top: 12px; }
-  .card .bar { height: 5px; background: rgba(255,255,255,.12); border-radius: 3px; margin-top: 18px; overflow: hidden; }
-  .card .bar i { display: block; height: 100%; background: var(--red); width: 0; }
-
-  #caption { position: absolute; top: 1400px; left: 70px; right: 70px; text-align: center; font-weight: 800; font-size: 60px; line-height: 1.22; letter-spacing: -.015em; }
+  #caption { position: absolute; top: 1400px; left: 70px; right: 70px; text-align: center; font-weight: 800; font-size: 62px; line-height: 1.22; letter-spacing: -.015em; }
   #caption .w { display: inline-block; padding: 2px 10px; margin: 0 -6px; border-radius: 14px; text-shadow: 0 4px 24px rgba(0,0,0,.7); }
   #caption .w.on { background: var(--red); text-shadow: none; }
 
-  #outro { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 44px; padding-bottom: 180px; }
-  #logo { width: 400px; height: 400px; box-shadow: 0 40px 120px rgba(217,44,28,.4); }
+  #outro { position: absolute; inset: 0; display: none; flex-direction: column; align-items: center; justify-content: center; gap: 60px; padding-bottom: 160px; }
+  #logo { width: 420px; height: 420px; box-shadow: 0 40px 120px rgba(217,44,28,.4); }
   #logo img { width: 100%; height: 100%; display: block; }
-  #outro .sub { font-family: "JetBrains Mono", monospace; font-size: 28px; letter-spacing: .2em; color: rgba(245,247,250,.75); }
-  #cta { font-weight: 800; font-size: 50px; letter-spacing: -.01em; padding: 22px 44px; border-radius: 999px; background: var(--white); color: var(--ink); }
+  #cta { font-weight: 800; font-size: 48px; letter-spacing: -.01em; padding: 22px 44px; border-radius: 999px; background: var(--white); color: var(--ink); }
   #cta b { color: var(--red); }
   #flash { background: #fff; opacity: 0; }
 </style>
@@ -71,367 +49,147 @@
 <div id="stage">
   <canvas id="pc" width="1080" height="1920"></canvas>
   <canvas id="fx" width="1080" height="1920"></canvas>
-  <div id="tags" class="layer">
-    <div class="tag" id="tPed">ZONA PEDONALE</div>
-    <div class="tag" id="tAlley">VICOLI</div>
-    <div class="tag" id="tIsl">3 ISOLE</div>
-    <div class="tag ghost" id="tMao">MAÓ</div>
-    <div class="tag ghost" id="tCas">ES CASTELL</div>
-    <div class="tag ghost" id="tRey">ISLA DEL REY · OSPEDALE</div>
-  </div>
   <div id="scrim" class="layer"></div>
   <div id="vignette" class="layer"></div>
-
   <div id="progress"><div><i></i></div><div><i></i></div><div><i></i></div><div><i></i></div><div><i></i></div></div>
-  <div id="hudL" class="mono"><b>●</b> SCANFLY EVO · MOBILE MAPPING<br>39.8885° N · 4.2658° E · MAÓ, MENORCA</div>
-  <div id="chip" class="mono">3DT × INFRAPLAN</div>
-
-  <div class="scene" id="s1">
-    <div class="kicker"><span>CASE STUDY · HERITAGE RECONSTRUCTION</span></div>
-    <div class="line sm"><span>3 città.</span></div>
-    <div class="line sm"><span>3 isole.</span></div>
-    <div class="line sm"><span class="red">1 sistema.</span></div>
-  </div>
-  <div class="scene" id="s2">
-    <div class="kicker"><span>LA SFIDA</span></div>
-    <div class="line sm"><span>Dove l'auto</span></div>
-    <div class="line sm"><span class="red">non passa.</span></div>
-  </div>
-  <div class="scene" id="s3">
-    <div class="kicker"><span>LA SOLUZIONE · 3DT</span></div>
-    <div class="line"><span>Scanfly <span class="hl">EVO</span></span></div>
-  </div>
-  <div class="scene" id="s4">
-    <div class="kicker"><span>IL RISULTATO · SMARTPROCESSING LIDAR</span></div>
-    <div class="line sm"><span>Nessuna area</span></div>
-    <div class="line sm"><span class="red">scoperta.</span></div>
-  </div>
-
+  <div id="titles"></div>
   <div id="cards">
-    <div class="pcard"><img src="assets/car.jpg"><div class="lab"><b>01</b>AUTO</div></div>
-    <div class="pcard"><img src="assets/backpack.jpg"><div class="lab"><b>02</b>ZAINO</div></div>
-    <div class="pcard"><img src="assets/bike.jpg"><div class="lab"><b>03</b>BICI</div></div>
-    <div class="pcard"><img src="assets/walk.jpg"><div class="lab"><b>04</b>A PIEDI</div></div>
-    <div class="pcard wide"><img src="assets/island.jpg"><div class="lab"><b>05</b>IN BARCA · ISLA DEL REY</div></div>
+    <div class="pcard"><img src="assets/car.jpg"></div>
+    <div class="pcard"><img src="assets/backpack.jpg"></div>
+    <div class="pcard"><img src="assets/bike.jpg"></div>
+    <div class="pcard"><img src="assets/walk.jpg"></div>
+    <div class="pcard wide"><img src="assets/island.jpg"></div>
   </div>
-
-  <div id="ticker" class="mono"><span>PUNTI <b id="pts">0</b></span><span>GNSS <b>RINEX · CORS</b></span><span><b>SLAM</b></span></div>
-
-  <div id="stats">
-    <div class="card"><div class="n">&lt;<span id="st1">0</span><small>giorni</small></div><div class="l">ACQUISIZIONE</div><div class="bar"><i></i></div></div>
-    <div class="card"><div class="n">&lt;<span id="st2">0</span><small>cm</small></div><div class="l">PRECISIONE</div><div class="bar"><i></i></div></div>
-    <div class="card"><div class="n"><span id="st3">0</span>+<span id="st4">0</span></div><div class="l">CITTÀ + ISOLE</div><div class="bar"><i></i></div></div>
-  </div>
-
   <div id="caption"></div>
-
-  <div id="outro">
-    <div id="logo"><img src="assets/logo.jpg"></div>
-    <div class="sub">SCANFLY EVO × INFRAPLAN</div>
-    <div id="cta">Case study su <b>3dt.cloud</b></div>
-  </div>
-
+  <div id="outro"><div id="logo"><img src="assets/logo.jpg"></div><div id="cta"></div></div>
   <canvas id="grain" width="540" height="960" style="width:1080px;height:1920px;opacity:.06;mix-blend-mode:overlay"></canvas>
   <div id="flash" class="layer"></div>
 </div>
 
 <script src="assets/clouds.js"></script>
+<script src="copy.js"></script>
+<script src="engine.js"></script>
 <script>
-/* timeline (s) — keep in sync with music.py */
-const DUR = 30, CUTS = [0, 4, 10, 18, 26, 30];
+/* ---------- timeline: 128 BPM, 24 bars = 45 s (keep in sync with music.py) ---------- */
+const DUR = 45, BAR = 1.875, CUTS = [0, 4 * BAR, 10 * BAR, 16 * BAR, 21 * BAR, DUR]; // 0 / 7.5 / 18.75 / 30 / 39.375 / 45
+const LANG = new URLSearchParams(location.search).get("lang") || "it";
+const TXT = window.COPY[LANG];
+document.documentElement.lang = LANG;
+$("cta").innerHTML = TXT.cta;
 
-const clamp = (v, a = 0, b = 1) => Math.min(b, Math.max(a, v));
-const lerp = (a, b, k) => a + (b - a) * k;
-const seg = (t, a, b) => clamp((t - a) / (b - a));
-const smooth = k => k * k * (3 - 2 * k);
-const outExpo = k => (k >= 1 ? 1 : 1 - Math.pow(2, -10 * k));
-const outBack = k => { const c = 1.7; return 1 + (c + 1) * Math.pow(k - 1, 3) + c * Math.pow(k - 1, 2); };
-const inOut = k => (k < .5 ? 4 * k * k * k : 1 - Math.pow(-2 * k + 2, 3) / 2);
-const $ = id => document.getElementById(id);
-const fmt = n => Math.round(n).toLocaleString("it-IT");
-function rng(seed) { return () => { seed |= 0; seed = seed + 0x6D2B79F5 | 0; let t = Math.imul(seed ^ seed >>> 15, 1 | seed); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
-const R = rng(2024);
-const turbo = k => {
-  const st = [[0.19, 0.07, 0.23], [0.16, 0.47, 0.93], [0.1, 0.84, 0.78], [0.47, 0.98, 0.35], [0.95, 0.83, 0.2], [0.96, 0.4, 0.12], [0.8, 0.1, 0.05]];
-  const f = clamp(k) * (st.length - 1), i = Math.min(st.length - 2, Math.floor(f)), r = f - i;
-  return [0, 1, 2].map(j => lerp(st[i][j], st[i + 1][j], r));
-};
+// one reading target at a time: no caption may overlap a title
+window.overlaps = [];
+for (const [a, b, s] of TXT.caps) for (const T of TXT.titles) if (a < T.b && T.a < b) window.overlaps.push(`${s} ⟷ ${T.lines || T.stat}`);
 
-/* ---------- point sets ---------- */
-function makeCloud(n) { return { n: 0, X: new Float32Array(n), Y: new Float32Array(n), Z: new Float32Array(n), A: new Float32Array(n * 3), B: new Float32Array(n * 3), K: new Uint8Array(n) }; }
-function push(c, x, y, z, a, b, k = 0) { const i = c.n++; c.X[i] = x; c.Y[i] = y; c.Z[i] = z; c.A.set(a, i * 3); c.B.set(b || a, i * 3); c.K[i] = k; }
+const fmtHTML = s => s.replace(/<r>/g, '<span class="r">').replace(/<\/r>/g, "</span>").replace(/<hl>/g, '<span class="hl">').replace(/<\/hl>/g, "</span>");
+const titleEls = TXT.titles.map(T => {
+  const el = document.createElement("div"); el.className = "title" + (T.big ? " big" : "") + (T.stat ? " stat" : "");
+  const lines = T.stat ? [`${T.stat[0].replace("<", "&lt;")}<small>${T.stat[1]}</small>`, T.stat[2]] : T.lines.map(fmtHTML);
+  el.innerHTML = lines.map((l, i) => `<div class="line${T.stat && i === 1 ? " lab" : ""}"><span>${l}</span></div>`).join("");
+  $("titles").appendChild(el); return el;
+});
 
-// real point-cloud renders from the case study -> particles with depth for parallax
-async function imageCloud(src, scale, depth, grayTint) {
-  const im = new Image(); im.src = src; await im.decode();
-  const w = Math.round(im.width * scale), h = Math.round(im.height * scale);
-  const cv = document.createElement("canvas"); cv.width = w; cv.height = h;
-  const g = cv.getContext("2d"); g.imageSmoothingQuality = "high"; g.drawImage(im, 0, 0, w, h);
-  const d = g.getImageData(0, 0, w, h).data, c = makeCloud(w * h);
-  for (let v = 0; v < h; v++) for (let u = 0; u < w; u++) {
-    const l = d[(v * w + u) * 4] / 255;
-    if (l < 0.09 || R() > Math.min(1, l * 1.5)) continue;
-    const it = 0.3 + 0.7 * l;
-    const zz = -(1 - v / h) * depth + (R() - .5) * 3;
-    const raw = grayTint.map(q => q * it), ramp = turbo(0.14 + 0.8 * Math.pow(l, 1.5)).map(q => q * (0.55 + 0.45 * l));
-    push(c, (u - w / 2) + (R() - .5) * .7, -(v - h / 2) + (R() - .5) * .7, zz, raw, ramp);
-  }
-  c.w = w; c.h = h; return c;
-}
-
-// stylised Maó harbour map (y = 0 plane)
-const inletX = z => 40 + 55 * Math.sin((z + 420) * 0.0062) - 0.12 * z;
-const inletW = z => 34 + 46 * clamp((-z - 120) / 300);
-const ISL = [[inletX(-40), -40, 20], [inletX(-190) + 6, -190, 11], [inletX(-300) - 8, -300, 14]];
-const TOWN = { ox: -120, oz: 190, a: 0.22, blk: 17, st: 5 };
-const townToWorld = (u, v) => { const s = TOWN.blk + TOWN.st, c = Math.cos(TOWN.a), n = Math.sin(TOWN.a); const x = u * s, z = v * s; return [TOWN.ox + x * c - z * n, TOWN.oz + x * n + z * c]; };
-const PED = { x: -10, z: 150, rx: 55, rz: 70 }; // old-town pedestrian area near the quay
-const inPed = (x, z) => ((x - PED.x) / PED.rx) ** 2 + ((z - PED.z) / PED.rz) ** 2 < 1;
-const water = (x, z) => Math.abs(x - inletX(z)) < inletW(z) && !ISL.some(([ix, iz, r]) => (x - ix) ** 2 + (z - iz) ** 2 < r * r) || z < -400;
-function mapCloud() {
-  const c = makeCloud(160000);
-  const MW = 280, MZ = 430;
-  for (let i = 0; i < 150000 && c.n < 158000; i++) {
-    const x = (R() * 2 - 1) * MW, z = (R() * 2 - 1) * MZ;
-    if (water(x, z)) { if (R() < 0.2) { const sh = 0.6 + 0.4 * R(); push(c, x, 0, z, [0.08 * sh, 0.26 * sh, 0.5 * sh], null, 3); } continue; }
-    const shore = Math.abs(x - inletX(z)) - inletW(z), coast = (shore >= 0 && shore < 5 && z > -400) || ISL.some(([ix, iz, r]) => { const d2 = (x - ix) ** 2 + (z - iz) ** 2; return d2 < r * r && d2 > (r - 3) ** 2; });
-    if (coast) { const it = 0.7 + 0.3 * R(); push(c, x, 0.5, z, [0.95 * it, 0.85 * it, 0.65 * it], null, 5); continue; }
-    // town grid?
-    const inMao = ((x - TOWN.ox) / 200) ** 2 + ((z - TOWN.oz) / 230) ** 2 < 1 && x < inletX(z) - inletW(z);
-    const inCas = ((x - 185) / 70) ** 2 + ((z + 190) / 90) ** 2 < 1 && x > inletX(z) + inletW(z);
-    const island = ISL.some(([ix, iz, r]) => (x - ix) ** 2 + (z - iz) ** 2 < r * r);
-    if (inMao || inCas || island) {
-      const s = TOWN.blk + TOWN.st, c0 = Math.cos(-TOWN.a), n0 = Math.sin(-TOWN.a), dx = x - TOWN.ox, dz = z - TOWN.oz;
-      const u = (dx * c0 - dz * n0) / s, v = (dx * n0 + dz * c0) / s;
-      const fu = u - Math.floor(u), fv = v - Math.floor(v), street = fu < TOWN.st / s || fv < TOWN.st / s;
-      const narrow = inPed(x, z) && (fu < 0.1 || fv < 0.1);
-      if (street && !inPed(x, z)) { if (R() < 0.35) push(c, x, 0, z, [0.3, 0.33, 0.38], null, 0); continue; }
-      if (narrow && R() < .7) continue;
-      const hsh = Math.abs(Math.sin(Math.floor(u) * 12.9898 + Math.floor(v) * 78.233) * 43758.5453) % 1, it = (0.4 + 0.6 * hsh) * (0.75 + R() * 0.25);
-      push(c, x, R() * 1.5, z, [0.62 * it, 0.74 * it, 0.95 * it], null, inPed(x, z) ? 2 : island ? 4 : 1);
-    } else if (R() < 0.28) {
-      const it = 0.2 + R() * 0.25; push(c, x, 0, z, [0.34 * it, 0.5 * it, 0.42 * it], null, 0);
-    }
-  }
-  return c;
-}
-// route of the car through the town grid, ending at the pedestrian zone
-const ROUTE = [[-9.5, 6.5], [-4.5, 6.5], [-4.5, 2.5], [-1.5, 2.5], [-1.5, -0.5], [2.5, -0.5], [2.5, -3.5]].map(([u, v]) => townToWorld(u - 0.11, v - 0.11));
-
-/* ---------- camera / projection ---------- */
-const W = 1080, Hh = 1920, CX = W / 2, F = 1350;
-function mkCam(yaw, pitch, dist, tx = 0, ty = 0, tz = 0, cy = 980) { return { yaw, pitch, dist, tx, ty, tz, cy }; }
-function project(cam, x, y, z) {
-  const cyw = Math.cos(cam.yaw), syw = Math.sin(cam.yaw), cp = Math.cos(cam.pitch), sp = Math.sin(cam.pitch);
-  const dx = x - cam.tx, dy = y - cam.ty, dz = z - cam.tz;
-  const x1 = dx * cyw - dz * syw, z1 = dx * syw + dz * cyw;
-  const y2 = dy * cp - z1 * sp, z2 = dy * sp + z1 * cp, depth = cam.dist - z2;
-  return [CX + F * x1 / depth, cam.cy - F * y2 / depth, depth];
-}
-
-const pc = $("pc"), ctx = pc.getContext("2d"), fx = $("fx"), fctx = fx.getContext("2d");
-const acc = new Float32Array(W * Hh * 3), img = ctx.createImageData(W, Hh);
-const off = document.createElement("canvas"); off.width = W; off.height = Hh; const octx = off.getContext("2d");
-const bloom = document.createElement("canvas"); bloom.width = 270; bloom.height = 480; const bctx = bloom.getContext("2d");
-const BG = (() => { const g = ctx.createRadialGradient(CX, 1000, 0, CX, 1000, 1300); g.addColorStop(0, "#0f151d"); g.addColorStop(0.6, "#07090c"); g.addColorStop(1, "#040506"); return g; })();
-
-// o: {alpha, sweep (x reveal), band, mix (0 A..1 B), mixSweep, tint(k,i)->[r,g,b]|null, size}
-function splat(c, cam, o) {
-  const cyw = Math.cos(cam.yaw), syw = Math.sin(cam.yaw), cp = Math.cos(cam.pitch), sp = Math.sin(cam.pitch);
-  let shown = 0;
-  for (let i = 0; i < c.n; i++) {
-    const x = c.X[i]; if (o.sweep !== undefined && x > o.sweep) continue;
-    const k = i * 3; let a = o.alpha;
-    let m = o.mix || 0; if (o.mixSweep !== undefined) m = clamp((o.mixSweep - x) / 30);
-    let r = lerp(c.A[k], c.B[k], m), g = lerp(c.A[k + 1], c.B[k + 1], m), b = lerp(c.A[k + 2], c.B[k + 2], m);
-    if (o.tint) { const tn = o.tint(c.K[i], x, c.Z[i]); if (tn) { r = tn[0]; g = tn[1]; b = tn[2]; } }
-    let glow = 0;
-    if (o.sweep !== undefined && o.band) { const d = (o.sweep - x) / o.band; glow += Math.exp(-d * d); }
-    if (o.mixSweep !== undefined && o.band2) { const d = (o.mixSweep - x) / o.band2; glow += 0.8 * Math.exp(-d * d); }
-    if (glow > 0.01) { r = lerp(r, 1.6, glow * .8); g = lerp(g, 0.3, glow * .8); b = lerp(b, 0.25, glow * .8); a = Math.max(a, glow * o.alpha * 1.2); }
-    const dx = x - cam.tx, dy = c.Y[i] - cam.ty, dz = c.Z[i] - cam.tz;
-    const x1 = dx * cyw - dz * syw, z1 = dx * syw + dz * cyw;
-    const y2 = dy * cp - z1 * sp, z2 = dy * sp + z1 * cp, depth = cam.dist - z2;
-    if (depth < 5) continue;
-    const px = (CX + F * x1 / depth) | 0, py = (cam.cy - F * y2 / depth) | 0;
-    if (px < 1 || py < 1 || px >= W - 3 || py >= Hh - 3) continue;
-    shown++;
-    const sz = o.size || 2; r *= a; g *= a; b *= a;
-    for (let yy = 0; yy < sz; yy++) { let p = ((py + yy) * W + px) * 3; for (let xx = 0; xx < sz; xx++, p += 3) { acc[p] += r; acc[p + 1] += g; acc[p + 2] += b; } }
-  }
-  return shown;
-}
-function flush() {
-  const d = img.data;
-  for (let p = 0, q = 0; p < acc.length; p += 3, q += 4) { d[q] = Math.min(255, acc[p] * 255); d[q + 1] = Math.min(255, acc[p + 1] * 255); d[q + 2] = Math.min(255, acc[p + 2] * 255); d[q + 3] = 255; }
-  octx.putImageData(img, 0, 0);
-  ctx.globalCompositeOperation = "source-over"; ctx.fillStyle = BG; ctx.fillRect(0, 0, W, Hh);
-  ctx.globalCompositeOperation = "lighter"; ctx.drawImage(off, 0, 0);
-  bctx.clearRect(0, 0, 270, 480); bctx.drawImage(off, 0, 0, 270, 480);
-  ctx.globalAlpha = 0.5; ctx.drawImage(bloom, 0, 0, W, Hh); ctx.globalAlpha = 1; ctx.globalCompositeOperation = "source-over";
-}
-
-/* ---------- scene visuals ---------- */
+/* ---------- cameras ---------- */
 let TOWNC, HOSP, MAP;
 const RAWT = [0.62, 0.76, 1.0];
-
-function camTown(t) { const k = seg(t, 0, 4.3); return mkCam(lerp(-0.16, 0.1, inOut(k)), lerp(0.1, 0.02, k), lerp(1150, 900, outExpo(k * 0.9)), 0, 0, -60, 1010); }
-function camHosp(t) { const k = seg(t, 17.8, 30); return mkCam(lerp(0.14, -0.14, inOut(k)), 0.05, lerp(1040, 900, smooth(k)), 0, 0, -50, 820); }
+function camTown(t) { const k = seg(t, 0, 7.8); return mkCam(lerp(-0.16, 0.14, inOut(k)), lerp(0.1, 0.02, k), lerp(1150, 860, outExpo(k * 0.8)), 0, 0, -60, 1000); }
+function camHosp(t) { const k = seg(t, 29.8, DUR); return mkCam(lerp(0.14, -0.16, inOut(k)), 0.05, lerp(1040, 880, smooth(k)), 0, 0, -50, 900); }
 function camMap(t) {
-  const K = [ // t, yaw, pitch, dist, tx, tz
-    [3.8, -0.35, 1.25, 1250, -40, 60], [6.8, -0.18, 1.1, 820, -60, 110], [9.8, 0.05, 0.98, 700, 40, -120], [18, 0.35, 1.2, 1150, 20, 0]];
+  const K = [[7.3, -0.35, 1.25, 1250, -40, 60], [11.2, -0.18, 1.1, 820, -60, 110], [14.2, 0.05, 0.98, 700, 40, -120], [18.75, 0.2, 1.15, 1000, 0, 0], [30, 0.4, 1.2, 1150, 20, 0]];
   let i = 0; while (i < K.length - 2 && t > K[i + 1][0]) i++;
   const a = K[i], b = K[i + 1], k = inOut(seg(t, a[0], b[0]));
   return mkCam(lerp(a[1], b[1], k), lerp(a[2], b[2], k), lerp(a[3], b[3], k), lerp(a[4], b[4], k), 0, lerp(a[5], b[5], k), 1000);
 }
 
-function pos(el, p, dx = 0, dy = 0, show = 1) {
-  el.style.opacity = show; el.style.transform = `translate(${(p[0] + dx) | 0}px, ${(p[1] + dy) | 0}px) translate(-50%, -50%) scale(${0.85 + 0.15 * show})`;
-}
-
+/* ---------- map overlay: car route, blocked zone, islands, new coverage ---------- */
+function ring(cam, cx, cz, rx, rz, n = 48) { fctx.beginPath(); for (let k = 0; k <= n; k++) { const an = k / n * 6.283, p = project(cam, cx + Math.cos(an) * rx, 1, cz + Math.sin(an) * rz); k ? fctx.lineTo(p[0], p[1]) : fctx.moveTo(p[0], p[1]); } }
 function mapOverlay(t, cam, mA) {
-  const tags = { tPed: 0, tAlley: 0, tIsl: 0, tMao: 0, tCas: 0 };
-  if (mA > 0.01) {
-    // car route (draw progressively)
-    const pr = seg(t, 4.4, 6.8);
-    const pts = ROUTE.map(([x, z]) => project(cam, x, 1, z));
-    let L = 0; const segL = []; for (let i = 1; i < pts.length; i++) { const l = Math.hypot(pts[i][0] - pts[i - 1][0], pts[i][1] - pts[i - 1][1]); segL.push(l); L += l; }
-    let rem = L * pr, head = pts[0];
-    fctx.save(); fctx.globalAlpha = mA; fctx.lineCap = fctx.lineJoin = "round";
-    fctx.shadowColor = "rgba(255,50,40,1)"; fctx.shadowBlur = 22; fctx.strokeStyle = "#ff3b2e"; fctx.lineWidth = 7;
-    fctx.beginPath(); fctx.moveTo(pts[0][0], pts[0][1]);
-    for (let i = 1; i < pts.length && rem > 0; i++) { const f = Math.min(1, rem / segL[i - 1]); head = [lerp(pts[i - 1][0], pts[i][0], f), lerp(pts[i - 1][1], pts[i][1], f)]; fctx.lineTo(head[0], head[1]); rem -= segL[i - 1]; }
-    if (pr > 0) fctx.stroke();
-    fctx.shadowBlur = 0;
-    if (pr > 0 && t < 10) { // car head + stop marker
-      fctx.fillStyle = "#fff"; fctx.beginPath(); fctx.arc(head[0], head[1], 11, 0, 6.283); fctx.fill();
-      fctx.strokeStyle = "#ff3b2e"; fctx.lineWidth = 5; fctx.beginPath(); fctx.arc(head[0], head[1], 20 + 6 * Math.sin(t * 12), 0, 6.283); fctx.stroke();
-    }
-    if (t > 6.8 && t < 10) { // blocked: X at route end
-      const k = outBack(seg(t, 6.8, 7.1)), e = pts[pts.length - 1], s = 22 * k;
-      fctx.strokeStyle = "#fff"; fctx.lineWidth = 7; fctx.beginPath(); fctx.moveTo(e[0] - s, e[1] - s); fctx.lineTo(e[0] + s, e[1] + s); fctx.moveTo(e[0] + s, e[1] - s); fctx.lineTo(e[0] - s, e[1] + s); fctx.stroke();
-    }
-    // pedestrian zone outline
-    const pz = seg(t, 6.9, 7.3) * (1 - seg(t, 9.7, 10));
-    if (pz > 0) {
-      fctx.globalAlpha = mA * pz; fctx.setLineDash([14, 10]); fctx.lineDashOffset = -t * 40; fctx.strokeStyle = "#ff3b2e"; fctx.lineWidth = 4; fctx.beginPath();
-      for (let k = 0; k <= 48; k++) { const an = k / 48 * 6.283, p = project(cam, PED.x + Math.cos(an) * PED.rx, 1, PED.z + Math.sin(an) * PED.rz); k ? fctx.lineTo(p[0], p[1]) : fctx.moveTo(p[0], p[1]); }
+  const pr = seg(t, 8.0, 11.0);
+  const pts = ROUTE.map(([x, z]) => project(cam, x, 1, z));
+  let L = 0; const segL = []; for (let i = 1; i < pts.length; i++) { const l = Math.hypot(pts[i][0] - pts[i - 1][0], pts[i][1] - pts[i - 1][1]); segL.push(l); L += l; }
+  let rem = L * pr, head = pts[0];
+  fctx.save(); fctx.globalAlpha = mA; fctx.lineCap = fctx.lineJoin = "round";
+  fctx.shadowColor = "rgba(255,50,40,1)"; fctx.shadowBlur = 22; fctx.strokeStyle = "#ff3b2e"; fctx.lineWidth = 7;
+  fctx.beginPath(); fctx.moveTo(pts[0][0], pts[0][1]);
+  for (let i = 1; i < pts.length && rem > 0; i++) { const f = Math.min(1, rem / segL[i - 1]); head = [lerp(pts[i - 1][0], pts[i][0], f), lerp(pts[i - 1][1], pts[i][1], f)]; fctx.lineTo(head[0], head[1]); rem -= segL[i - 1]; }
+  if (pr > 0) fctx.stroke();
+  fctx.shadowBlur = 0;
+  if (pr > 0 && t < 18.75) {
+    fctx.fillStyle = "#fff"; fctx.beginPath(); fctx.arc(head[0], head[1], 11, 0, 6.283); fctx.fill();
+    fctx.strokeStyle = "#ff3b2e"; fctx.lineWidth = 5; fctx.beginPath(); fctx.arc(head[0], head[1], 20 + 6 * Math.sin(t * 12), 0, 6.283); fctx.stroke();
+  }
+  if (t > 11.0 && t < 18.75) {
+    const k = outBack(seg(t, 11.0, 11.3)), e = pts[pts.length - 1], s = 24 * k;
+    fctx.strokeStyle = "#fff"; fctx.lineWidth = 8; fctx.beginPath(); fctx.moveTo(e[0] - s, e[1] - s); fctx.lineTo(e[0] + s, e[1] + s); fctx.moveTo(e[0] + s, e[1] - s); fctx.lineTo(e[0] - s, e[1] + s); fctx.stroke();
+  }
+  fctx.setLineDash([14, 10]); fctx.lineDashOffset = -t * 40; fctx.strokeStyle = "#ff3b2e"; fctx.lineWidth = 4;
+  const pz = seg(t, 11.2, 11.6) * (1 - seg(t, 18.4, 18.75));
+  if (pz > 0) { fctx.globalAlpha = mA * pz; ring(cam, PED.x, PED.z, PED.rx, PED.rz); fctx.stroke(); }
+  const ir = 1 - seg(t, 18.4, 18.75);
+  ISL.forEach(([ix, iz, r], j) => {
+    const q = seg(t, 12.4 + j * 0.25, 12.8 + j * 0.25); if (!q || !ir) return;
+    fctx.globalAlpha = mA * ir * q; const rr = (r + 10) * (0.6 + 0.4 * outBack(q)); ring(cam, ix, iz, rr, rr, 40); fctx.stroke();
+  });
+  // solution: bike/walk through the old town, boat to the islands
+  const cov = seg(t, 26.0, 29.2), covA = 1 - seg(t, 29.6, 30);
+  if (cov > 0 && covA > 0) {
+    fctx.setLineDash([10, 12]); fctx.lineDashOffset = -t * 60; fctx.globalAlpha = Math.min(1, mA * 1.8) * covA; fctx.strokeStyle = "#fff"; fctx.lineWidth = 5;
+    const paths = [[ROUTE[ROUTE.length - 1], [PED.x - 20, PED.z - 40], [PED.x + 15, PED.z], [PED.x - 10, PED.z + 45]], [[inletX(120) - 30, 120], [inletX(20), 20], ...ISL.map(([x, z]) => [x, z])]];
+    for (const path of paths) {
+      const P2 = path.map(([x, z]) => project(cam, x, 1, z)), n = (P2.length - 1) * cov;
+      fctx.beginPath(); fctx.moveTo(P2[0][0], P2[0][1]);
+      for (let i = 1; i <= Math.ceil(n); i++) { const f = Math.min(1, n - (i - 1)); fctx.lineTo(lerp(P2[i - 1][0], P2[i][0], f), lerp(P2[i - 1][1], P2[i][1], f)); }
       fctx.stroke();
     }
-    // islands rings
-    const ir = seg(t, 8.2, 8.6) * (1 - seg(t, 9.7, 10));
-    if (ir > 0) ISL.forEach(([ix, iz, r], j) => {
-      const q = seg(t, 8.2 + j * 0.18, 8.5 + j * 0.18); if (!q) return;
-      fctx.globalAlpha = mA * ir * q; fctx.beginPath();
-      for (let k = 0; k <= 40; k++) { const an = k / 40 * 6.283, rr = (r + 10) * (0.6 + 0.4 * outBack(q)), p = project(cam, ix + Math.cos(an) * rr, 1, iz + Math.sin(an) * rr); k ? fctx.lineTo(p[0], p[1]) : fctx.moveTo(p[0], p[1]); }
-      fctx.stroke();
+  }
+  fctx.restore();
+}
+
+/* ---------- text ---------- */
+function titles(t) {
+  TXT.titles.forEach((T, n) => {
+    const el = titleEls[n], on = t > T.a - 0.01 && t < T.b + 0.01;
+    el.style.display = on ? "block" : "none"; if (!on) return;
+    el.querySelectorAll(".line > span").forEach((sp, i) => {
+      const d = T.stagger ? T.stagger[i] || 0 : i * 0.25, k = outExpo(seg(t, T.a + d, T.a + d + 0.55)), q = inOut(seg(t, T.b - 0.35, T.b));
+      sp.style.transform = `translateY(${(1 - k) * 110 - q * 110}%)`;
     });
-    // S3: new coverage paths — bike/walk through the old town, boat to the islands
-    const cov = seg(t, 15.6, 17.4) * (1 - seg(t, 17.6, 18));
-    if (cov > 0) {
-      fctx.setLineDash([10, 12]); fctx.lineDashOffset = -t * 60; fctx.globalAlpha = mA * 1.4 * (1 - seg(t, 17.6, 18)); fctx.strokeStyle = "#ffffff"; fctx.lineWidth = 5;
-      const paths = [
-        [ROUTE[ROUTE.length - 1], [PED.x - 20, PED.z - 40], [PED.x + 15, PED.z], [PED.x - 10, PED.z + 45]],
-        [[inletX(120) - 30, 120], [inletX(20), 20], ...ISL.map(([x, z]) => [x, z])]];
-      for (const path of paths) {
-        const P2 = path.map(([x, z]) => project(cam, x, 1, z)), n = (P2.length - 1) * cov;
-        fctx.beginPath(); fctx.moveTo(P2[0][0], P2[0][1]);
-        for (let i = 1; i <= Math.ceil(n); i++) { const f = Math.min(1, n - (i - 1)); fctx.lineTo(lerp(P2[i - 1][0], P2[i][0], f), lerp(P2[i - 1][1], P2[i][1], f)); }
-        fctx.stroke();
-      }
-    }
-    fctx.restore();
-    const vis = (a, b) => seg(t, a, a + 0.25) * (1 - seg(t, b - 0.25, b)) * mA;
-    pos($("tMao"), project(cam, TOWN.ox - 40, 1, TOWN.oz + 120), 0, 0, vis(4.4, 9.9));
-    pos($("tCas"), project(cam, 200, 1, -150), 40, 0, vis(4.8, 8.1));
-    pos($("tPed"), project(cam, PED.x, 1, PED.z - PED.rz), 0, -30, vis(7.0, 8.5));
-    pos($("tAlley"), project(cam, PED.x + 60, 1, PED.z + 20), 70, 0, vis(7.4, 8.5));
-    pos($("tIsl"), project(cam, ISL[1][0] + 60, 1, ISL[1][1]), 60, 0, vis(8.4, 9.9));
-  } else ["tMao", "tCas", "tPed", "tAlley", "tIsl"].forEach(id => $(id).style.opacity = 0);
+  });
 }
-
-/* ---------- DOM animation ---------- */
-function lineIn(el, t, tin, tout, delay = 0) {
-  const k = outExpo(seg(t, tin + delay, tin + delay + 0.55)), q = inOut(seg(t, tout - 0.35, tout));
-  el.style.transform = `translateY(${(1 - k) * 110 - q * 110}%)`;
-}
-function sceneAnim(id, t, tin, tout, stagger) {
-  const sc = $(id), on = t > tin - 0.01 && t < tout + 0.01;
-  sc.style.display = on ? "block" : "none"; if (!on) return;
-  const kick = sc.querySelector(".kicker span"), kk = outExpo(seg(t, tin, tin + 0.5)), kq = seg(t, tout - 0.3, tout);
-  kick.style.display = "inline-block"; kick.style.transform = `translateY(${(1 - kk) * 100 - kq * 100}%)`;
-  sc.querySelector(".kicker").style.opacity = 1 - kq;
-  sc.querySelectorAll(".line > span").forEach((el, i) => lineIn(el, t, tin, tout, stagger[i] || 0));
-}
-
-const CAPS = [
-  [0.3, 3.85, "Menorca: tre città storiche e tre isole da digitalizzare."],
-  [4.1, 6.8, "Il mobile mapping su auto copre le strade…"],
-  [6.9, 9.8, "…ma non vicoli, zone pedonali e isole del porto."],
-  [10.2, 13.1, "Infraplan e 3DT mettono alla prova Scanfly EVO."],
-  [13.3, 15.5, "Dal tetto dell'auto allo zaino, senza attrezzi."],
-  [15.6, 17.8, "In bici, a piedi, in barca verso le isole."],
-  [18.2, 21.8, "Rilievo completo in meno di 3 giorni."],
-  [22.0, 25.8, "Precisione sotto i 10 cm, traiettorie rifinite con SLAM."],
-  [26.3, 29.8, "Il case study completo è su 3dt.cloud"],
-];
 const capEl = $("caption"); let capIdx = -2;
 function captions(t) {
-  const idx = CAPS.findIndex(([a, b]) => t >= a && t < b);
-  if (idx !== capIdx) { capIdx = idx; capEl.innerHTML = idx < 0 ? "" : CAPS[idx][2].split(" ").map(w => `<span class="w">${w}</span>`).join(" "); }
+  const idx = TXT.caps.findIndex(([a, b]) => t >= a && t < b);
+  if (idx !== capIdx) { capIdx = idx; capEl.innerHTML = idx < 0 ? "" : TXT.caps[idx][2].split(" ").map(w => `<span class="w">${w}</span>`).join(" "); }
   if (idx < 0) return;
-  const [a, b] = CAPS[idx], ws = capEl.querySelectorAll(".w"), n = ws.length, span = Math.min(b - a - 0.4, n * 0.28), step = span / n, out = seg(t, b - 0.18, b);
+  const [a, b] = TXT.caps[idx], ws = capEl.querySelectorAll(".w"), n = ws.length, span = Math.min(b - a - 0.5, n * 0.26), step = span / n, out = seg(t, b - 0.18, b);
   ws.forEach((w, i) => {
     const ti = a + i * step, k = outBack(seg(t, ti, ti + 0.16));
     w.style.opacity = t >= ti ? 1 - out : 0;
     w.style.transform = `translateY(${(1 - k) * 26}px) scale(${0.82 + 0.18 * k})`;
-    w.classList.toggle("on", t >= ti && t < ti + step + 0.05 && t < a + span + 0.25);
+    w.classList.toggle("on", t >= ti && t < ti + step && t < a + span + 0.25);
   });
 }
 
-// platform cards: [enter time]
-const CARD_T = [13.3, 14.3, 15.6, 16.3, 17.0];
+const CARD_T = [22.5, 24.1, 26.0, 26.9, 27.8];
 function cards(t) {
-  const el = $("cards"), on = t > 13.2 && t < 18.05; el.style.display = on ? "block" : "none"; if (!on) return;
-  const out = seg(t, 17.75, 18.05);
+  const el = $("cards"), on = t > 22.4 && t < 30.05; el.style.display = on ? "block" : "none"; if (!on) return;
+  const out = seg(t, 29.7, 30.05);
   el.querySelectorAll(".pcard").forEach((c, i) => {
-    const t0 = CARD_T[i], k = outBack(seg(t, t0, t0 + 0.45)), vis = t >= t0;
-    const later = CARD_T.filter(x => t >= x + 0.1 && x > t0).length; // cards stacked on top
-    const rot = [-4, 3, -2.5, 3.5, 0][i];
-    const push = later * 1;
-    c.style.display = vis ? "block" : "none";
-    c.style.zIndex = i;
-    c.style.opacity = (1 - out);
-    const baseX = [-150, 150, -150, 150, 0][i], baseY = [0, 20, 40, 60, 0][i];
-    c.style.transform = `translate(${baseX * 0.55 + (1 - k) * baseX * 1.2}px, ${baseY + (1 - k) * 900 - push * 26}px) rotate(${rot * (0.6 + 0.4 * k) + (1 - k) * rot * 3}deg) scale(${1 - push * 0.06})`;
+    const t0 = CARD_T[i], k = outBack(seg(t, t0, t0 + 0.45));
+    const push = CARD_T.filter(x => t >= x + 0.1 && x > t0).length, rot = [-4, 3, -2.5, 3.5, 0][i];
+    const bx = [-150, 150, -150, 150, 0][i], by = [0, 20, 40, 60, 0][i];
+    c.style.display = t >= t0 ? "block" : "none"; c.style.zIndex = i; c.style.opacity = 1 - out;
+    c.style.transform = `translate(${bx * 0.55 + (1 - k) * bx * 1.2}px, ${by + (1 - k) * 900 - push * 26}px) rotate(${rot * (0.6 + 0.4 * k) + (1 - k) * rot * 3}deg) scale(${1 - push * 0.06})`;
     c.style.filter = `brightness(${1 - push * 0.22})`;
   });
 }
 
-function stats(t) {
-  const el = $("stats"), tin = 18.9, tout = 25.85, on = t > tin && t < tout;
-  el.style.display = on ? "flex" : "none"; if (!on) return;
-  const del = [0, 0.45, 0.9];
-  el.querySelectorAll(".card").forEach((c, i) => {
-    const t0 = tin + del[i], k = outBack(seg(t, t0, t0 + 0.5)), q = seg(t, tout - 0.3, tout);
-    c.style.opacity = seg(t, t0, t0 + 0.2) * (1 - q);
-    c.style.transform = `translateY(${(1 - k) * 60 + q * 20}px)`;
-    const cnt = outExpo(seg(t, t0, t0 + 1.0));
-    if (i === 0) $("st1").textContent = fmt(3 * cnt);
-    if (i === 1) $("st2").textContent = fmt(10 * cnt);
-    if (i === 2) { $("st3").textContent = fmt(3 * cnt); $("st4").textContent = fmt(3 * cnt); }
-    c.querySelector(".bar i").style.width = `${cnt * [78, 92, 100][i]}%`;
-  });
-}
-
 function outro(t) {
-  const el = $("outro"), on = t >= 26; el.style.display = on ? "flex" : "none"; if (!on) return;
-  const k = outBack(seg(t, 26.1, 26.7)), lg = $("logo");
-  lg.style.transform = `scale(${0.4 + 0.6 * k}) rotate(${(1 - k) * -8}deg)`; lg.style.opacity = seg(t, 26.1, 26.3);
-  lg.style.clipPath = `inset(${(1 - outExpo(seg(t, 26.1, 26.6))) * 50}% 0 ${(1 - outExpo(seg(t, 26.1, 26.6))) * 50}% 0)`;
-  const sub = el.querySelector(".sub"), cta = $("cta");
-  sub.style.opacity = seg(t, 27.0, 27.4); sub.style.transform = `translateY(${(1 - outExpo(seg(t, 27, 27.6))) * 30}px)`;
-  const kc = outBack(seg(t, 27.4, 27.9)); cta.style.opacity = seg(t, 27.4, 27.6); cta.style.transform = `scale(${0.7 + 0.3 * kc})`;
+  const T0 = CUTS[4], el = $("outro"), on = t >= T0; el.style.display = on ? "flex" : "none"; if (!on) return;
+  const k = outBack(seg(t, T0 + 0.1, T0 + 0.7)), lg = $("logo"), r = 1 - outExpo(seg(t, T0 + 0.1, T0 + 0.6));
+  lg.style.transform = `scale(${0.4 + 0.6 * k}) rotate(${(1 - k) * -8}deg)`; lg.style.opacity = seg(t, T0 + 0.1, T0 + 0.3);
+  lg.style.clipPath = `inset(${r * 50}% 0 ${r * 50}% 0)`;
+  const kc = outBack(seg(t, T0 + 1.2, T0 + 1.7)), cta = $("cta"); cta.style.opacity = seg(t, T0 + 1.2, T0 + 1.4); cta.style.transform = `scale(${0.7 + 0.3 * kc})`;
 }
 
 const grains = [0, 1, 2, 3].map(() => { const c = document.createElement("canvas"); c.width = 540; c.height = 960; const g = c.getContext("2d"), d = g.createImageData(540, 960); for (let i = 0; i < d.data.length; i += 4) { const v = R() * 255; d.data[i] = d.data[i + 1] = d.data[i + 2] = v; d.data[i + 3] = 255; } g.putImageData(d, 0, 0); return c; });
@@ -441,58 +199,43 @@ const gctx = $("grain").getContext("2d");
 function render(t) {
   let shake = 0; for (const c of CUTS.slice(1, 5)) if (t >= c) shake = Math.max(shake, Math.exp(-(t - c) * 9));
   acc.fill(0); fctx.clearRect(0, 0, W, Hh);
-  let shown = 0;
 
-  // S1: Maó old town (real point cloud render) scanned in
-  const tA = 1 - seg(t, 3.7, 4.2);
+  // 1 · Maó old town (real point-cloud render) scanned in
+  const tA = 1 - seg(t, 7.2, 7.8);
   if (tA > 0) {
-    const s = lerp(-TOWNC.w / 2 - 20, TOWNC.w / 2 + 20, 1 - Math.pow(1 - seg(t, 0.1, 3.0), 1.5));
-    shown = splat(TOWNC, camTown(t), { alpha: 0.95 * tA, sweep: s, band: 14, size: 2 });
+    const s = lerp(-TOWNC.w / 2 - 20, TOWNC.w / 2 + 20, 1 - Math.pow(1 - seg(t, 0.1, 4.2), 1.5));
+    splat(TOWNC, camTown(t), { alpha: 0.95 * tA, sweep: s, band: 14, size: 2 });
   }
-  // S2–S3: harbour map
-  const mA = seg(t, 3.8, 4.4) * (t < 10 ? 1 : lerp(1, 0.45, seg(t, 10, 10.6))) * (1 - seg(t, 17.7, 18.1));
+  // 2–3 · harbour map
+  const mA = seg(t, 7.3, 8.0) * (t < 18.75 ? 1 : lerp(1, 0.45, seg(t, 18.75, 19.4))) * (1 - seg(t, 29.6, 30.1));
   if (mA > 0) {
     const cam = camMap(t);
-    const pedK = seg(t, 6.9, 7.4) * (1 - seg(t, 9.6, 10)), islK = seg(t, 8.2, 8.7) * (1 - seg(t, 9.6, 10));
-    const pulse = 0.75 + 0.25 * Math.sin(t * 14);
-    splat(MAP, cam, { alpha: mA * (t < 4.8 ? outExpo(seg(t, 3.8, 4.8)) : 1), size: 2, tint: (k) => {
-      if (k === 2 && pedK > 0) return [lerp(0.6, 1.4 * pulse, pedK), lerp(0.7, 0.25, pedK), lerp(0.9, 0.2, pedK)];
-      if (k === 4 && islK > 0) return [lerp(0.6, 1.4 * pulse, islK), lerp(0.7, 0.25, islK), lerp(0.9, 0.2, islK)];
-      return null; } });
+    const pedK = seg(t, 11.2, 11.7) * (1 - seg(t, 18.3, 18.75)), islK = seg(t, 12.4, 13.0) * (1 - seg(t, 18.3, 18.75)), pulse = 0.75 + 0.25 * Math.sin(t * 14);
+    const hot = (k) => [lerp(0.6, 1.4 * pulse, k), lerp(0.7, 0.25, k), lerp(0.9, 0.2, k)];
+    splat(MAP, cam, { alpha: mA * (t < 8.4 ? outExpo(seg(t, 7.3, 8.4)) : 1), size: 2, tint: (k) => (k === 2 && pedK > 0 ? hot(pedK) : k === 4 && islK > 0 ? hot(islK) : null) });
     mapOverlay(t, cam, mA);
-  } else mapOverlay(t, null, 0);
-  // S4: Isla del Rey hospital (real point cloud render): scan, then intensity colour sweep
-  const hA = seg(t, 17.9, 18.3) * (t < 26 ? 1 : lerp(1, 0.22, seg(t, 26, 27)));
+  }
+  // 4 · Isla del Rey hospital (real point-cloud render): scan, then intensity colour sweep
+  const hA = seg(t, 29.9, 30.3) * (t < CUTS[4] ? 1 : lerp(1, 0.22, seg(t, CUTS[4], CUTS[4] + 1)));
   if (hA > 0) {
-    const s = lerp(-HOSP.w / 2 - 20, HOSP.w / 2 + 20, 1 - Math.pow(1 - seg(t, 18.1, 20.6), 1.5));
-    const m = lerp(-HOSP.w / 2 - 40, HOSP.w / 2 + 40, inOut(seg(t, 21.8, 24.2)));
-    const cam = camHosp(t);
-    shown = Math.max(shown, splat(HOSP, cam, { alpha: 0.95 * hA, sweep: s, band: 12, mixSweep: m, band2: t < 24.3 ? 10 : 0, size: 2 }));
-    const tr = $("tRey"); pos(tr, project(cam, HOSP.w / 2 - 300, -HOSP.h / 2 + 30, 0), 0, 0, seg(t, 19.2, 19.5) * (1 - seg(t, 25.6, 25.9)));
-  } else $("tRey").style.opacity = 0;
+    const s = lerp(-HOSP.w / 2 - 20, HOSP.w / 2 + 20, 1 - Math.pow(1 - seg(t, 30.1, 32.8), 1.5));
+    const m = lerp(-HOSP.w / 2 - 40, HOSP.w / 2 + 40, inOut(seg(t, 33.8, 36.6)));
+    splat(HOSP, camHosp(t), { alpha: 0.95 * hA, sweep: s, band: 12, mixSweep: m, band2: t < 36.7 ? 10 : 0, size: 2 });
+  }
   flush();
   const sh = shake * 10;
-  pc.style.transform = fx.style.transform = $("tags").style.transform = `translate(${Math.sin(t * 77) * sh}px, ${Math.cos(t * 63) * sh}px)`;
+  pc.style.transform = fx.style.transform = `translate(${Math.sin(t * 77) * sh}px, ${Math.cos(t * 63) * sh}px)`;
 
-  sceneAnim("s1", t, 0.35, 3.95, [0.3, 1.3, 2.3]);
-  sceneAnim("s2", t, 4.2, 9.9, [0.3, 2.9]);
-  sceneAnim("s3", t, 10.25, 17.9, [0]);
-  sceneAnim("s4", t, 18.3, 25.9, [0.4, 1.0]);
-
-  const tick = $("ticker"), tOn = t > 0.4 && t < 3.8; tick.style.opacity = tOn ? 1 : 0;
-  $("pts").textContent = fmt(shown * 311.7);
-  $("hudL").querySelector("b").style.opacity = (t * 2) % 1 < .5 ? 1 : .25;
-  const hudFade = 1 - seg(t, 25.8, 26.2);
-  $("hudL").style.opacity = $("chip").style.opacity = $("progress").style.opacity = hudFade;
+  titles(t); captions(t); cards(t); outro(t);
+  $("progress").style.opacity = 1 - seg(t, CUTS[4] - 0.2, CUTS[4] + 0.2);
   document.querySelectorAll("#progress i").forEach((el, i) => el.style.width = `${100 * seg(t, CUTS[i], CUTS[i + 1])}%`);
-
-  captions(t); cards(t); stats(t); outro(t);
-  $("scrim").style.background = t < 26 ? "" : `linear-gradient(180deg, rgba(7,9,12,.92) 0%, rgba(7,9,12,${lerp(.5, .8, seg(t, 26, 27))}) 30%, rgba(7,9,12,${lerp(0, .7, seg(t, 26, 27))}) 50%, rgba(7,9,12,.95) 100%)`;
-  let fl = 0; for (const c of CUTS.slice(1, 5)) if (t >= c) fl = Math.max(fl, 0.4 * Math.exp(-(t - c) * 14));
+  $("scrim").style.background = t < CUTS[4] ? "" : `linear-gradient(180deg, rgba(7,9,12,.9) 0%, rgba(7,9,12,${lerp(.45, .8, seg(t, CUTS[4], CUTS[4] + 1))}) 30%, rgba(7,9,12,${lerp(0, .7, seg(t, CUTS[4], CUTS[4] + 1))}) 50%, rgba(7,9,12,.95) 100%)`;
+  let fl = 0; for (const c of CUTS.slice(1, 5)) if (t >= c) fl = Math.max(fl, 0.35 * Math.exp(-(t - c) * 14));
   $("flash").style.opacity = fl;
   gctx.drawImage(grains[Math.floor(t * 30) % 4], 0, 0);
 }
 window.render = render;
+window.DURATION = DUR;
 window.ready = (async () => {
   await document.fonts.ready;
   await Promise.all([...document.images].map(i => i.decode().catch(() => {})));
