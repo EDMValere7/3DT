@@ -1,0 +1,4 @@
+node_modules
+out/*
+!out/3DT_Infraplan_Menorca_reel_30s.mp4
+!out/cover.jpg
