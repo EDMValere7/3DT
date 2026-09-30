@@ -1,0 +1,4 @@
+node_modules/
+out/*
+!out/3DT_NDAerial_reel_30s_DEMO.mp4
+!out/cover.jpg

@@ -1,0 +1,459 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<title>3DT × NDAerial — Reel 30s</title>
+<style>
+  @font-face { font-family: "Inter Tight"; src: url(fonts/InterTight.woff2) format("woff2"); font-weight: 100 900; }
+  @font-face { font-family: "JetBrains Mono"; src: url(fonts/JetBrainsMono.woff2) format("woff2"); font-weight: 100 800; }
+  :root { --red: #E30613; --ink: #07090c; --white: #f5f7fa; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { width: 1080px; height: 1920px; background: var(--ink); overflow: hidden; }
+  #stage { position: relative; width: 1080px; height: 1920px; overflow: hidden; background: radial-gradient(120% 70% at 50% 55%, #0e141c 0%, #07090c 60%); font-family: "Inter Tight", sans-serif; color: var(--white); }
+  canvas { position: absolute; left: 0; top: 0; }
+  .layer { position: absolute; inset: 0; pointer-events: none; }
+  #scrim { background: linear-gradient(180deg, rgba(7,9,12,.92) 0%, rgba(7,9,12,.55) 22%, rgba(7,9,12,0) 38%, rgba(7,9,12,0) 62%, rgba(7,9,12,.6) 74%, rgba(7,9,12,.95) 100%); }
+  #vignette { background: radial-gradient(110% 80% at 50% 50%, rgba(0,0,0,0) 55%, rgba(0,0,0,.55) 100%); }
+
+  /* progress */
+  #progress { position: absolute; top: 64px; left: 60px; right: 60px; display: flex; gap: 10px; }
+  #progress div { flex: 1; height: 5px; border-radius: 3px; background: rgba(255,255,255,.18); overflow: hidden; }
+  #progress i { display: block; height: 100%; width: 0; background: var(--white); }
+
+  /* HUD */
+  .mono { font-family: "JetBrains Mono", monospace; }
+  #hudL { position: absolute; top: 104px; left: 60px; font-size: 24px; letter-spacing: .12em; color: rgba(245,247,250,.75); line-height: 1.6; }
+  #hudL b { color: var(--red); font-weight: 700; }
+  #demo { position: absolute; top: 104px; right: 60px; font-size: 20px; letter-spacing: .14em; color: var(--red); border: 2px solid var(--red); border-radius: 999px; padding: 6px 16px; background: rgba(7,9,12,.5); }
+  #ticker { position: absolute; top: 1090px; left: 60px; right: 60px; padding: 14px 24px; border-radius: 16px; background: rgba(7,9,12,.55); border: 1px solid rgba(255,255,255,.1); display: flex; justify-content: space-between; font-size: 22px; letter-spacing: .14em; color: rgba(245,247,250,.8); }
+  #ticker span b { color: var(--white); font-weight: 700; }
+
+  /* headlines */
+  .scene { position: absolute; left: 60px; right: 60px; top: 250px; }
+  .kicker { font-family: "JetBrains Mono", monospace; font-size: 28px; letter-spacing: .22em; color: rgba(245,247,250,.8); display: flex; align-items: center; gap: 16px; margin-bottom: 26px; overflow: hidden; }
+  .kicker::before { content: ""; width: 14px; height: 14px; background: var(--red); border-radius: 50%; flex: none; }
+  .line { overflow: hidden; padding-bottom: .06em; }
+  .line > span { display: inline-block; font-weight: 900; font-size: 168px; line-height: .92; letter-spacing: -.045em; }
+  .sm > span { font-size: 128px; }
+  .red { color: var(--red); }
+  .hl { background: var(--red); color: var(--white); padding: 0 .12em; border-radius: .08em; }
+
+  /* stats */
+  #stats { position: absolute; top: 1150px; left: 60px; right: 60px; display: flex; gap: 22px; }
+  .card { flex: 1; border-radius: 30px; padding: 26px 24px 24px; background: rgba(12,16,22,.62); border: 1.5px solid rgba(255,255,255,.14); backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px); }
+  .card .n { font-weight: 900; font-size: 76px; letter-spacing: -.04em; line-height: 1; white-space: nowrap; }
+  .card .n small { font-size: 38px; font-weight: 800; letter-spacing: -.02em; margin-left: 4px; color: rgba(245,247,250,.8); }
+  .card .l { font-family: "JetBrains Mono", monospace; font-size: 21px; letter-spacing: .14em; color: rgba(245,247,250,.65); margin-top: 12px; }
+  .card .bar { height: 5px; background: rgba(255,255,255,.12); border-radius: 3px; margin-top: 18px; overflow: hidden; }
+  .card .bar i { display: block; height: 100%; background: var(--red); width: 0; }
+
+  /* captions */
+  #caption { position: absolute; top: 1370px; left: 70px; right: 70px; text-align: center; font-weight: 800; font-size: 60px; line-height: 1.22; letter-spacing: -.015em; }
+  #caption .w { display: inline-block; padding: 2px 10px; margin: 0 -6px; border-radius: 14px; text-shadow: 0 4px 24px rgba(0,0,0,.7); }
+  #caption .w.on { background: var(--red); text-shadow: none; }
+
+  /* outro */
+  #outro { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 44px; padding-bottom: 180px; }
+  #logo { width: 380px; height: 380px; background: var(--red); position: relative; box-shadow: 0 40px 120px rgba(227,6,19,.35); }
+  #logo .t { position: absolute; left: 30px; bottom: 74px; font-weight: 900; font-size: 196px; letter-spacing: -.05em; line-height: .8; color: #fff; }
+  #logo .s { position: absolute; left: 34px; bottom: 34px; font-weight: 500; font-size: 27px; color: rgba(255,255,255,.9); letter-spacing: .005em; }
+  #outro .sub { font-family: "JetBrains Mono", monospace; font-size: 28px; letter-spacing: .2em; color: rgba(245,247,250,.75); }
+  #cta { font-weight: 800; font-size: 50px; letter-spacing: -.01em; padding: 22px 44px; border-radius: 999px; background: var(--white); color: var(--ink); }
+  #cta b { color: var(--red); }
+
+  #flash { background: #fff; opacity: 0; mix-blend-mode: screen; }
+</style>
+</head>
+<body>
+<div id="stage">
+  <canvas id="pc" width="1080" height="1920"></canvas>
+  <canvas id="fx" width="1080" height="1920"></canvas>
+  <div id="scrim" class="layer"></div>
+  <div id="vignette" class="layer"></div>
+
+  <div id="progress"><div><i></i></div><div><i></i></div><div><i></i></div><div><i></i></div><div><i></i></div></div>
+  <div id="hudL" class="mono"><b>●</b> SCANFLY XT · LIDAR<br>46.3290° N · 11.0020° E · TUENNO (TN)</div>
+  <div id="demo" class="mono">DEMO · DATI SEGNAPOSTO</div>
+
+  <!-- S1 hook -->
+  <div class="scene" id="s1">
+    <div class="kicker"><span>CASE STUDY · NDAERIAL SERVICE</span></div>
+    <div class="line"><span><span id="ha">0</span> ettari.</span></div>
+    <div class="line"><span class="red">1 volo.</span></div>
+  </div>
+  <!-- S2 problem -->
+  <div class="scene" id="s2">
+    <div class="kicker"><span>LA SFIDA</span></div>
+    <div class="line sm"><span>Il terreno?</span></div>
+    <div class="line sm"><span class="red">Invisibile.</span></div>
+  </div>
+  <!-- S3 solution -->
+  <div class="scene" id="s3">
+    <div class="kicker"><span>LA SOLUZIONE · 3DT</span></div>
+    <div class="line"><span>Scanfly</span></div>
+    <div class="line"><span><span class="hl">XT</span></span></div>
+  </div>
+  <!-- S4 result -->
+  <div class="scene" id="s4">
+    <div class="kicker"><span>IL RISULTATO · DTM</span></div>
+    <div class="line sm"><span>Via le chiome.</span></div>
+    <div class="line sm"><span class="red">Resta il suolo.</span></div>
+  </div>
+
+  <div id="ticker" class="mono">
+    <span>PUNTI <b id="pts">0</b></span><span>ALT <b>80 m</b></span><span>VEL <b>8 m/s</b></span>
+  </div>
+
+  <div id="stats">
+    <div class="card"><div class="n"><span id="st1">0</span><small>pt/m²</small></div><div class="l">DENSITÀ</div><div class="bar"><i></i></div></div>
+    <div class="card"><div class="n">±<span id="st2">0</span><small>cm</small></div><div class="l">PRECISIONE</div><div class="bar"><i></i></div></div>
+    <div class="card"><div class="n"><span id="st3">0</span><small>min</small></div><div class="l">DI VOLO</div><div class="bar"><i></i></div></div>
+  </div>
+
+  <div id="caption"></div>
+
+  <div id="outro">
+    <div id="logo"><div class="t">3DT</div><div class="s">Technology meets efficiency</div></div>
+    <div class="sub">SCANFLY XT × NDAERIAL SERVICE</div>
+    <div id="cta">Case study su <b>3dt.cloud</b></div>
+  </div>
+
+  <canvas id="grain" width="540" height="960" style="width:1080px;height:1920px;opacity:.07;mix-blend-mode:overlay"></canvas>
+  <div id="flash" class="layer"></div>
+</div>
+
+<script>
+/* ---------- timeline (seconds) — keep in sync with music.py ---------- */
+const DUR = 30, CUTS = [0, 4, 10, 18, 26, 30];
+
+/* ---------- helpers ---------- */
+const clamp = (v, a = 0, b = 1) => Math.min(b, Math.max(a, v));
+const lerp = (a, b, k) => a + (b - a) * k;
+const seg = (t, a, b) => clamp((t - a) / (b - a));
+const smooth = k => k * k * (3 - 2 * k);
+const outExpo = k => (k >= 1 ? 1 : 1 - Math.pow(2, -10 * k));
+const outBack = k => { const c = 1.7; return 1 + (c + 1) * Math.pow(k - 1, 3) + c * Math.pow(k - 1, 2); };
+const inOut = k => (k < .5 ? 4 * k * k * k : 1 - Math.pow(-2 * k + 2, 3) / 2);
+const $ = id => document.getElementById(id);
+const fmt = n => Math.round(n).toLocaleString("it-IT");
+function rng(seed) { return () => { seed |= 0; seed = seed + 0x6D2B79F5 | 0; let t = Math.imul(seed ^ seed >>> 15, 1 | seed); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+const R = rng(3107);
+const gauss = () => { let u = 0, v = 0; while (!u) u = R(); v = R(); return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v); };
+
+/* ---------- synthetic survey: Val di Non orchard on a slope ---------- */
+const S = 100; // half-size (m)
+const riverX = z => 18 * Math.sin(z * 0.022) - 30;
+const roadZ = x => 0.28 * x + 22;
+function H(x, z) {
+  let h = 0.14 * z + 7 * Math.sin(x * 0.028 + 0.6) * Math.cos(z * 0.021) + 2.6 * Math.sin(x * 0.07 + z * 0.05) + 1.2 * Math.sin(x * 0.17 - z * 0.11);
+  const dr = (x - riverX(z)) / 9; h -= 6 * Math.exp(-dr * dr);
+  return h;
+}
+const P = { x: [], y: [], z: [], cls: [], inten: [] }; // cls: 0 ground 1 veg 2 building 3 wire
+const add = (x, y, z, c, i) => { P.x.push(x); P.y.push(y); P.z.push(z); P.cls.push(c); P.inten.push(i); };
+
+// ground
+for (let i = 0; i < 52000; i++) {
+  const x = (R() * 2 - 1) * S, z = (R() * 2 - 1) * S;
+  const onRoad = Math.abs(z - roadZ(x)) < 3;
+  add(x, H(x, z) + gauss() * 0.05, z, 0, onRoad ? 0.45 : 0.55 + R() * 0.45);
+}
+// orchards: parcels with different row orientations
+const cell = 40, rowSp = 4.6, treeSp = 2.6;
+const buildings = [[-58, roadZ(-58) + 12, 14, 10, 0.3], [-20, roadZ(-20) - 13, 18, 11, 0.28], [40, roadZ(40) + 12, 12, 9, 0.25], [70, roadZ(70) - 12, 16, 10, 0.3]];
+const inBuilding = (x, z) => buildings.some(([bx, bz, w, d]) => Math.abs(x - bx) < w / 2 + 3 && Math.abs(z - bz) < d / 2 + 3);
+for (let cx = -S; cx < S; cx += cell) for (let cz = -S; cz < S; cz += cell) {
+  if (R() < 0.18) continue; // meadow
+  const a = [0, Math.PI / 2, 0.35, -0.4, 1.1][Math.floor(R() * 5)];
+  const ca = Math.cos(a), sa = Math.sin(a);
+  const mx = cx + cell / 2, mz = cz + cell / 2;
+  for (let u = -32; u <= 32; u += rowSp) for (let v = -32; v <= 32; v += treeSp) {
+    const x = mx + u * ca - v * sa, z = mz + u * sa + v * ca;
+    if (x < cx + 2 || x > cx + cell - 2 || z < cz + 2 || z > cz + cell - 2) continue;
+    if (Math.abs(x - riverX(z)) < 8 || Math.abs(z - roadZ(x)) < 6 || inBuilding(x, z)) continue;
+    const g = H(x, z), hh = 2.4 + R() * 0.8;
+    for (let k = 0; k < 16; k++) { // spindle canopy
+      const th = R() * 6.283, r = Math.sqrt(R()), yy = R();
+      const rad = 1.25 * (1 - yy * 0.55) * r;
+      add(x + Math.cos(th) * rad, g + 0.9 + yy * hh, z + Math.sin(th) * rad, 1, 0.5 + R() * 0.5);
+    }
+    add(x, g + 0.4, z, 1, 0.5);
+  }
+}
+// riparian trees along the stream
+for (let i = 0; i < 180; i++) {
+  const z = (R() * 2 - 1) * S, x = riverX(z) + (R() < .5 ? -1 : 1) * (5 + R() * 3), g = H(x, z), r0 = 2.5 + R() * 2, hh = 5 + R() * 5;
+  for (let k = 0; k < 40; k++) { const th = R() * 6.283, ph = Math.acos(2 * R() - 1), r = r0 * Math.cbrt(R()); add(x + r * Math.sin(ph) * Math.cos(th), g + hh + r * Math.cos(ph) * 0.8, z + r * Math.sin(ph) * Math.sin(th), 1, 0.6 + R() * 0.4); }
+}
+// farm buildings (gable roofs + walls)
+for (const [bx, bz, w, d, rot] of buildings) {
+  const g = H(bx, bz) + 0.3, eave = 6, ridge = 9.5, c = Math.cos(rot), s = Math.sin(rot);
+  const put = (u, y, v) => add(bx + u * c - v * s, y, bz + u * s + v * c, 2, 0.8 + R() * 0.2);
+  for (let k = 0; k < 900; k++) { const u = (R() - .5) * w, v = (R() - .5) * d; put(u, g + eave + (ridge - eave) * (1 - Math.abs(v) / (d / 2)), v); }
+  for (let k = 0; k < 500; k++) { const side = Math.floor(R() * 4), y = g + R() * eave; const u = side < 2 ? (R() - .5) * w : (side === 2 ? -w / 2 : w / 2); const v = side < 2 ? (side ? d / 2 : -d / 2) : (R() - .5) * d; put(u, y, v); }
+}
+// power line (3 conductors + poles)
+const lineZ = x => -64 + 0.12 * x;
+for (let px = -S; px < S; px += 40) {
+  const x0 = px, x1 = px + 40, h0 = H(x0, lineZ(x0)) + 14, h1 = H(x1, lineZ(x1)) + 14;
+  for (let k = 0; k <= 160; k++) { const f = k / 160, x = lerp(x0, x1, f), sag = 2.6 * 4 * f * (1 - f); for (const off of [-1.4, 0, 1.4]) add(x, lerp(h0, h1, f) - sag + (off === 0 ? 0.9 : 0), lineZ(x) + off, 3, 1); }
+  for (let k = 0; k < 40; k++) add(x0, H(x0, lineZ(x0)) + k / 40 * 14.9, lineZ(x0), 3, 0.9);
+}
+
+const N = P.x.length;
+const X = Float32Array.from(P.x), Y = Float32Array.from(P.y), Z = Float32Array.from(P.z), C = Uint8Array.from(P.cls), I = Float32Array.from(P.inten);
+let hMin = 1e9, hMax = -1e9; for (let i = 0; i < N; i++) if (C[i] === 0) { hMin = Math.min(hMin, Y[i]); hMax = Math.max(hMax, Y[i]); }
+
+// palettes
+const RAW = new Float32Array(N * 3), VEG = new Float32Array(N * 3), CLS = new Float32Array(N * 3), ELV = new Float32Array(N * 3);
+const turbo = k => { // compact turbo-like ramp
+  const st = [[0.19, 0.07, 0.23], [0.16, 0.47, 0.93], [0.1, 0.84, 0.78], [0.47, 0.98, 0.35], [0.95, 0.83, 0.2], [0.96, 0.4, 0.12], [0.8, 0.1, 0.05]];
+  const f = clamp(k) * (st.length - 1), i = Math.min(st.length - 2, Math.floor(f)), r = f - i;
+  return [0, 1, 2].map(j => lerp(st[i][j], st[i + 1][j], r));
+};
+for (let i = 0; i < N; i++) {
+  const it = I[i], c = C[i], o = i * 3;
+  const shade = c === 0 ? 0.55 + 0.45 * clamp((Y[i] - hMin) / (hMax - hMin)) : 1;
+  RAW.set([0.52 * it * shade, 0.68 * it * shade, 0.95 * it * shade], o);
+  const vg = c === 1 ? [0.32, 1.0, 0.5] : c === 0 ? [0.16, 0.2, 0.26] : [0.35, 0.38, 0.45];
+  VEG.set(vg.map(v => v * (0.6 + 0.4 * it)), o);
+  const cl = [[1.0, 0.56, 0.26], [0.3, 0.95, 0.45], [0.95, 0.95, 1.0], [1.0, 0.86, 0.2]][c];
+  CLS.set(cl.map(v => v * (0.6 + 0.4 * it)), o);
+  if (c === 0) {
+    const k = (Y[i] - hMin) / (hMax - hMin), col = turbo(k), contour = ((Y[i] - hMin) / 1.6) % 1 < 0.14;
+    ELV.set(contour ? [1.4, 1.4, 1.4] : col.map(v => v * 0.9), o);
+  } else ELV.set(cl, o);
+}
+
+/* ---------- camera keyframes ---------- */
+const CAM = [ // t, yaw, pitch, dist, ty
+  [0, -0.75, 1.08, 300, 0], [4, -0.45, 0.82, 250, 0], [10, 0.25, 0.42, 175, 2],
+  [18, 0.75, 0.62, 215, 0], [26, 1.25, 0.95, 270, 0], [30, 1.45, 1.12, 360, 0]];
+function camAt(t) {
+  let i = 0; while (i < CAM.length - 2 && t > CAM[i + 1][0]) i++;
+  const a = CAM[i], b = CAM[i + 1], k = inOut(seg(t, a[0], b[0]));
+  return { yaw: lerp(a[1], b[1], k), pitch: lerp(a[2], b[2], k), dist: lerp(a[3], b[3], k), ty: lerp(a[4], b[4], k) };
+}
+
+/* ---------- renderer ---------- */
+const W = 1080, Hh = 1920, CX = W / 2, CY = 980;
+const pc = $("pc"), ctx = pc.getContext("2d"), fx = $("fx"), fctx = fx.getContext("2d");
+const acc = new Float32Array(W * Hh * 3), img = ctx.createImageData(W, Hh);
+const bloom = document.createElement("canvas"); bloom.width = 270; bloom.height = 480; const bctx = bloom.getContext("2d");
+const BG = (() => { const g = ctx.createRadialGradient(CX, 1050, 0, CX, 1050, 1300); g.addColorStop(0, "#101820"); g.addColorStop(0.6, "#07090c"); g.addColorStop(1, "#040506"); return g; })();
+const off = document.createElement("canvas"); off.width = W; off.height = Hh; const octx = off.getContext("2d");
+
+function project(cam, x, y, z) {
+  const cy = Math.cos(cam.yaw), sy = Math.sin(cam.yaw), cp = Math.cos(cam.pitch), sp = Math.sin(cam.pitch);
+  const dx = x, dy = y - cam.ty, dz = z;
+  const x1 = dx * cy - dz * sy, z1 = dx * sy + dz * cy;
+  const y2 = dy * cp - z1 * sp, z2 = dy * sp + z1 * cp, depth = cam.dist - z2;
+  const f = 1350;
+  return [CX + f * x1 / depth, CY - f * y2 / depth, depth];
+}
+
+const sweep1 = t => lerp(-S - 15, S + 15, 1 - Math.pow(1 - seg(t, 0.1, 3.4), 1.6));
+const sweep2 = t => lerp(-S - 15, S + 15, seg(t, 10.6, 17.2));
+const front4 = t => lerp(-S - 30, S + 30, inOut(seg(t, 18.3, 21.2)));
+
+function drawCloud(t, cam) {
+  acc.fill(0);
+  const cyw = Math.cos(cam.yaw), syw = Math.sin(cam.yaw), cp = Math.cos(cam.pitch), sp = Math.sin(cam.pitch), f = 1350;
+  const s1 = sweep1(t), s2 = sweep2(t), f4 = front4(t);
+  const vegHi = smooth(seg(t, 6.6, 7.6));
+  const global = t < 26 ? 1 : lerp(1, 0.28, smooth(seg(t, 26, 27.2)));
+  const phase3 = t >= 10, phase4 = t >= 18;
+  let shown = 0;
+  for (let i = 0; i < N; i++) {
+    const x = X[i]; let y = Y[i]; const z = Z[i], c = C[i], o = i * 3;
+    if (x > s1) continue;
+    let a = 0.62 * global, r, g, b;
+    // base colour
+    if (!phase3) { r = lerp(RAW[o], VEG[o], vegHi); g = lerp(RAW[o + 1], VEG[o + 1], vegHi); b = lerp(RAW[o + 2], VEG[o + 2], vegHi); }
+    else {
+      const m = clamp((s2 - x) / 14);
+      r = lerp(VEG[o], CLS[o], m); g = lerp(VEG[o + 1], CLS[o + 1], m); b = lerp(VEG[o + 2], CLS[o + 2], m);
+      if (phase4) {
+        const k = clamp((f4 - x) / 26);
+        if (c === 0) { r = lerp(r, ELV[o], k); g = lerp(g, ELV[o + 1], k); b = lerp(b, ELV[o + 2], k); }
+        else { if (k >= 1) continue; a *= 1 - k; y += k * k * 10; }
+      }
+    }
+    // scan glow band
+    let glow = 0;
+    const d1 = (s1 - x) / 3.5; if (t < 4) glow += Math.exp(-d1 * d1);
+    if (t >= 10 && t < 18) { const d2 = (s2 - x) / 3; glow += Math.exp(-d2 * d2); }
+    if (t >= 18 && t < 22 && c === 0) { const d4 = (f4 - x) / 3; glow += 0.7 * Math.exp(-d4 * d4); }
+    if (glow > 0.01) { r = lerp(r, 1.6, glow * .8); g = lerp(g, 0.35, glow * .8); b = lerp(b, 0.35, glow * .8); a = Math.max(a, glow * global); }
+    // project
+    const dy = y - cam.ty, x1 = x * cyw - z * syw, z1 = x * syw + z * cyw;
+    const y2 = dy * cp - z1 * sp, z2 = dy * sp + z1 * cp, depth = cam.dist - z2;
+    if (depth < 5) continue;
+    const px = (CX + f * x1 / depth) | 0, py = (CY - f * y2 / depth) | 0;
+    if (px < 1 || py < 1 || px >= W - 2 || py >= Hh - 2) continue;
+    shown++;
+    const sz = depth < 150 ? 3 : 2;
+    r *= a; g *= a; b *= a;
+    for (let yy = 0; yy < sz; yy++) { let p = ((py + yy) * W + px) * 3; for (let xx = 0; xx < sz; xx++, p += 3) { acc[p] += r; acc[p + 1] += g; acc[p + 2] += b; } }
+  }
+  const d = img.data;
+  for (let p = 0, q = 0; p < acc.length; p += 3, q += 4) {
+    d[q] = Math.min(255, acc[p] * 255); d[q + 1] = Math.min(255, acc[p + 1] * 255); d[q + 2] = Math.min(255, acc[p + 2] * 255); d[q + 3] = 255;
+  }
+  octx.putImageData(img, 0, 0);
+  ctx.globalCompositeOperation = "source-over"; ctx.fillStyle = BG; ctx.fillRect(0, 0, W, Hh);
+  ctx.globalCompositeOperation = "lighter"; ctx.drawImage(off, 0, 0);
+  bctx.clearRect(0, 0, 270, 480); bctx.drawImage(off, 0, 0, 270, 480);
+  ctx.globalAlpha = 0.55; ctx.imageSmoothingQuality = "high"; ctx.drawImage(bloom, 0, 0, W, Hh); ctx.globalAlpha = 1;
+  ctx.globalCompositeOperation = "source-over";
+  return shown;
+}
+
+function drawDrone(t, cam) {
+  fctx.clearRect(0, 0, W, Hh);
+  let sx = null;
+  if (t >= 0.1 && t < 3.9) sx = sweep1(t); else if (t >= 10.3 && t < 17.8) sx = sweep2(t);
+  if (sx === null) return;
+  const vis = t < 4 ? seg(t, 0.1, 0.4) * (1 - seg(t, 3.3, 3.8)) : seg(t, 10.3, 10.8) * (1 - seg(t, 17.3, 17.8));
+  const alt = 58, dz = 0;
+  const [dxp, dyp, dd] = project(cam, sx, H(sx, dz) + alt, dz);
+  // laser fan to the ground scan line
+  const pts = []; for (let k = 0; k <= 24; k++) { const z = -S + k * (2 * S / 24); const p = project(cam, sx, H(sx, z), z); pts.push(p); }
+  fctx.save(); fctx.globalAlpha = vis;
+  const grd = fctx.createLinearGradient(dxp, dyp, pts[12][0], pts[12][1]);
+  grd.addColorStop(0, "rgba(227,6,19,0.42)"); grd.addColorStop(1, "rgba(227,6,19,0.05)");
+  fctx.fillStyle = grd; fctx.beginPath(); fctx.moveTo(dxp, dyp); for (const p of pts) fctx.lineTo(p[0], p[1]); fctx.closePath(); fctx.fill();
+  fctx.shadowColor = "rgba(255,40,50,1)"; fctx.shadowBlur = 24; fctx.strokeStyle = "rgba(255,90,90,1)"; fctx.lineWidth = 4;
+  fctx.beginPath(); pts.forEach((p, k) => k ? fctx.lineTo(p[0], p[1]) : fctx.moveTo(p[0], p[1])); fctx.stroke();
+  fctx.shadowBlur = 0;
+  // drone glyph
+  const s = 5200 / dd; fctx.translate(dxp, dyp); fctx.rotate(-cam.yaw * 0.2);
+  fctx.strokeStyle = "#f5f7fa"; fctx.lineWidth = Math.max(2, s * 0.09); fctx.lineCap = "round";
+  fctx.beginPath(); fctx.moveTo(-s, -s * .6); fctx.lineTo(s, s * .6); fctx.moveTo(s, -s * .6); fctx.lineTo(-s, s * .6); fctx.stroke();
+  for (const [ux, uy] of [[-1, -.6], [1, .6], [1, -.6], [-1, .6]]) {
+    fctx.beginPath(); fctx.ellipse(ux * s, uy * s, s * .55, s * .2, (t * 40) % 6.283, 0, 6.283); fctx.strokeStyle = "rgba(245,247,250,.7)"; fctx.lineWidth = 2; fctx.stroke();
+  }
+  fctx.fillStyle = "#1a2029"; fctx.fillRect(-s * .38, -s * .28, s * .76, s * .56);
+  fctx.strokeStyle = "#f5f7fa"; fctx.lineWidth = 2; fctx.strokeRect(-s * .38, -s * .28, s * .76, s * .56);
+  fctx.fillStyle = (t * 4) % 1 < .5 ? "#ff2433" : "#5a0b10"; fctx.beginPath(); fctx.arc(0, s * .42, s * .12, 0, 6.283); fctx.fill();
+  fctx.restore();
+}
+
+/* ---------- DOM animation ---------- */
+function lineIn(el, t, tin, tout, delay = 0) {
+  const k = outExpo(seg(t, tin + delay, tin + delay + 0.55)), q = inOut(seg(t, tout - 0.35, tout));
+  el.style.transform = `translateY(${(1 - k) * 110 - q * 110}%)`;
+}
+function sceneAnim(id, t, tin, tout, stagger = [0, 0.18, 0.36]) {
+  const sc = $(id), on = t > tin - 0.01 && t < tout + 0.01;
+  sc.style.display = on ? "block" : "none"; if (!on) return;
+  const kick = sc.querySelector(".kicker span");
+  const kk = outExpo(seg(t, tin, tin + 0.5)), kq = seg(t, tout - 0.3, tout);
+  kick.style.display = "inline-block"; kick.style.transform = `translateY(${(1 - kk) * 100 + kq * -100}%)`;
+  sc.querySelector(".kicker").style.opacity = 1 - kq;
+  sc.querySelectorAll(".line > span").forEach((el, i) => lineIn(el, t, tin, tout, stagger[i] || 0));
+}
+
+const CAPS = [
+  [0.3, 3.85, "NDAerial doveva rilevare 150 ettari di meleti in Val di Non."],
+  [4.1, 6.8, "Filari fitti, pendenze, vegetazione ovunque."],
+  [6.9, 9.8, "Dall'alto, il terreno non si vede."],
+  [10.2, 13.1, "Così hanno scelto il LiDAR Scanfly XT."],
+  [13.3, 15.5, "Il laser passa tra le foglie…"],
+  [15.6, 17.8, "…e arriva fino al suolo."],
+  [18.2, 21.8, "Un passaggio in software: la vegetazione sparisce."],
+  [22.0, 25.8, "Resta il terreno reale, al centimetro."],
+  [26.3, 29.8, "Il case study completo è su 3dt.cloud"],
+];
+const capEl = $("caption"); let capIdx = -2;
+function captions(t) {
+  const idx = CAPS.findIndex(([a, b]) => t >= a && t < b);
+  if (idx !== capIdx) {
+    capIdx = idx; capEl.innerHTML = idx < 0 ? "" : CAPS[idx][2].split(" ").map(w => `<span class="w">${w}</span>`).join(" ");
+  }
+  if (idx < 0) return;
+  const [a, b] = CAPS[idx], ws = capEl.querySelectorAll(".w"), n = ws.length, span = Math.min(b - a - 0.4, n * 0.28), step = span / n;
+  const out = seg(t, b - 0.18, b);
+  ws.forEach((w, i) => {
+    const ti = a + i * step, k = outBack(seg(t, ti, ti + 0.16)), vis = t >= ti;
+    w.style.opacity = vis ? (1 - out) : 0;
+    w.style.transform = `translateY(${(1 - k) * 26}px) scale(${0.82 + 0.18 * k})`;
+    w.classList.toggle("on", t >= ti && t < ti + step + 0.05 && i < n);
+  });
+  // keep last word highlighted briefly then release
+  if (t > a + span + 0.25) ws.forEach(w => w.classList.remove("on"));
+}
+
+function stats(t) {
+  const el = $("stats"), tin = 12.2, tout = 17.8, on = t > tin && t < tout;
+  el.style.display = on ? "flex" : "none"; if (!on) return;
+  const vals = [[240, "st1", 0], [3, "st2", 0.5], [25, "st3", 1.0]];
+  el.querySelectorAll(".card").forEach((c, i) => {
+    const t0 = tin + vals[i][2], k = outBack(seg(t, t0, t0 + 0.5)), q = seg(t, tout - 0.3, tout);
+    c.style.opacity = seg(t, t0, t0 + 0.2) * (1 - q);
+    c.style.transform = `translateY(${(1 - k) * 60 + q * 20}px)`;
+    const cnt = outExpo(seg(t, t0, t0 + 1.1));
+    $(vals[i][1]).textContent = fmt(vals[i][0] * cnt);
+    c.querySelector(".bar i").style.width = `${cnt * [86, 94, 62][i]}%`;
+  });
+}
+
+function outro(t) {
+  const el = $("outro"), on = t >= 26;
+  el.style.display = on ? "flex" : "none"; if (!on) return;
+  const k = outBack(seg(t, 26.1, 26.7)), lg = $("logo");
+  lg.style.transform = `scale(${0.4 + 0.6 * k}) rotate(${(1 - k) * -8}deg)`; lg.style.opacity = seg(t, 26.1, 26.3);
+  lg.querySelector(".t").style.clipPath = `inset(0 ${100 - 100 * outExpo(seg(t, 26.4, 27))}% 0 0)`;
+  lg.querySelector(".s").style.opacity = seg(t, 26.8, 27.2);
+  const sub = el.querySelector(".sub"), cta = $("cta");
+  sub.style.opacity = seg(t, 27.0, 27.4); sub.style.transform = `translateY(${(1 - outExpo(seg(t, 27, 27.6))) * 30}px)`;
+  const kc = outBack(seg(t, 27.4, 27.9)); cta.style.opacity = seg(t, 27.4, 27.6); cta.style.transform = `scale(${0.7 + 0.3 * kc})`;
+}
+
+/* grain frames */
+const grains = [0, 1, 2, 3].map(() => { const c = document.createElement("canvas"); c.width = 540; c.height = 960; const g = c.getContext("2d"), d = g.createImageData(540, 960); for (let i = 0; i < d.data.length; i += 4) { const v = R() * 255; d.data[i] = d.data[i + 1] = d.data[i + 2] = v; d.data[i + 3] = 255; } g.putImageData(d, 0, 0); return c; });
+const gctx = $("grain").getContext("2d");
+
+/* ---------- main ---------- */
+function render(t) {
+  const cam = camAt(t);
+  // impact shake on cuts
+  let shake = 0; for (const c of CUTS.slice(1, 5)) if (t >= c) shake = Math.max(shake, Math.exp(-(t - c) * 9));
+  const sh = shake * 10; cam.yaw += Math.sin(t * 90) * shake * 0.004;
+  const shown = drawCloud(t, cam); drawDrone(t, cam);
+  $("pc").style.transform = $("fx").style.transform = `translate(${Math.sin(t * 77) * sh}px, ${Math.cos(t * 63) * sh}px)`;
+
+  sceneAnim("s1", t, 0.35, 3.95, [0.35, 1.55]);
+  sceneAnim("s2", t, 4.2, 9.9, [0.2, 2.9]);
+  sceneAnim("s3", t, 10.25, 17.9, [0, 0.12]);
+  sceneAnim("s4", t, 18.3, 25.9, [0.9, 3.8]);
+  $("ha").textContent = fmt(150 * outExpo(seg(t, 0.7, 1.9)));
+
+  // hud
+  const tick = $("ticker"), tOn = (t > 0.4 && t < 3.9) || (t > 10.4 && t < 12.2);
+  tick.style.opacity = tOn ? 1 : 0;
+  $("pts").textContent = fmt(shown * 157.3 + (t > 10 ? 4.1e6 : 0));
+  $("hudL").querySelector("b").style.opacity = (t * 2) % 1 < .5 ? 1 : .25;
+  const hudFade = 1 - seg(t, 25.8, 26.2);
+  $("hudL").style.opacity = $("demo").style.opacity = hudFade;
+  $("progress").style.opacity = hudFade;
+  document.querySelectorAll("#progress i").forEach((el, i) => el.style.width = `${100 * seg(t, CUTS[i], CUTS[i + 1])}%`);
+
+  captions(t); stats(t); outro(t);
+
+  // scrim darkens for outro
+  $("scrim").style.background = t < 26 ? "" : `linear-gradient(180deg, rgba(7,9,12,${.92}) 0%, rgba(7,9,12,${lerp(.55, .8, seg(t, 26, 27))}) 30%, rgba(7,9,12,${lerp(0, .7, seg(t, 26, 27))}) 50%, rgba(7,9,12,.95) 100%)`;
+
+  // flash on cuts
+  let fl = 0; for (const c of CUTS.slice(1, 5)) if (t >= c) fl = Math.max(fl, 0.4 * Math.exp(-(t - c) * 14));
+  if (t < 0.25) fl = Math.max(fl, 0);
+  $("flash").style.opacity = fl;
+
+  gctx.drawImage(grains[Math.floor(t * 30) % 4], 0, 0);
+}
+window.render = render;
+window.ready = document.fonts.ready.then(() => true);
+render(0);
+</script>
+</body>
+</html>
